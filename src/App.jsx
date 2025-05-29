@@ -5,8 +5,8 @@ import {
   Link
 } from 'react-router-dom';
 
-import LoginForm from './pages/login';
-import SignupForm from './pages/signup';
+import LoginForm from './pages/LoginForm';
+import SignupForm from './pages/SignupForm';
 
 function App() {
 
