@@ -1,0 +1,51 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - main   # or your main branch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '23'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Vite app
+        run: npm run build
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: dist
+          path: dist
+
+      # Assuming you have tsuru CLI set up with auth and your app configured
+      - name: Deploy to Tsuru
+        env:
+          TSURU_APP: ${{ env.TSURU_APP }}
+          TSURU_TOKEN: ${{ secrets.TSURU_TOKEN }}
+          PORT: ${{ env.PORT }}
+        run:
+          tsuru app deploy --app $TSURU_APP dist ./Procfile
