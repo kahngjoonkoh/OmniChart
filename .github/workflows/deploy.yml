@@ -52,6 +52,5 @@ jobs:
       - name: Deploy to Tsuru
         env:
           TSURU_TOKEN: ${{ secrets.TSURU_TOKEN }}
-          PORT: ${{ env.PORT }}
         run:
           tsuru app deploy --app omnichart dist Procfile
