@@ -1,13 +1,14 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom';
+import { FaSearch } from 'react-icons/fa';
 
-function SearchBar(q = '') {
-  const [query, setQuery] = useState(q);
+const SearchBar = ({ initialQuery = "" }) => {
+  const [query, setQuery] = useState(initialQuery);
   const navigate = useNavigate();
 
   const search = (e) => {
-    if (query != q && query != '') {
-      navigate("/search")
+    if (query !== initialQuery && query !== "") {
+      navigate("/search?q=" + query)
     }
   }
 
@@ -23,6 +24,11 @@ function SearchBar(q = '') {
             search();
         }}
       />
+      <button onClick={search}>
+        <FaSearch />
+      </button>
     </div>
   )
 }
+
+export default SearchBar;
