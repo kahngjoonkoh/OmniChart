@@ -8,6 +8,7 @@ import {
 import LoginForm from './pages/LoginForm';
 import SignupForm from './pages/SignupForm';
 import ChartDisplay from './pages/ChartDisplay';
+import Header from './components/Header';
 
 function App() {
 
@@ -24,6 +25,7 @@ function App() {
         <Route path="/login" element={<LoginForm />} />
         <Route path="/signup" element={<SignupForm />} />
         <Route path="/stocks/:symbol" element={<ChartDisplay />} />
+        <Route path="/" element={<Header isLoggedIn={true} />} />
       </Routes>
     </Router>
   )
