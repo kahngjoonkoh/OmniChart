@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import SearchBar from './SearchBar'
 
-const Header = ({ isLoggedIn, initialQuery = "" }) => {
+const Header = ({ isLoggedIn }) => {
   const navigate = useNavigate();
 
   const logout = (e) => {
@@ -11,7 +11,7 @@ const Header = ({ isLoggedIn, initialQuery = "" }) => {
   return (
     <div>
       <h5>OmniChart</h5>
-      <SearchBar initialQuery={initialQuery} />
+      <SearchBar />
       <div>
         {isLoggedIn ? (
           <button onClick={logout}>Log out</button>
