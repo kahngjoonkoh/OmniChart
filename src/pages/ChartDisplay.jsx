@@ -113,9 +113,9 @@ const sharpDropSegment = {
   startIndex: 95,
   endIndex: 110,
   news: [
-    "Company X reported unexpected losses due to supply chain issues.",
-    "Global market volatility caused sharp stock price correction.",
-    "CEO announced strategic restructuring to address downturn.",
+    "NVIDIA stock fell 17% on Jan 27, wiping out $600B in value.",
+    "Drop triggered by DeepSeek’s R1 AI model, rivaling Western models at lower cost.",
+    "R1 was trained using stockpiled NVIDIA GPUs, raising demand concerns.",
   ],
 };
 
@@ -130,7 +130,7 @@ export default function ChartDisplay() {
     <div style={{ display: 'flex', height: '100vh', fontFamily: 'Arial, sans-serif' }}>
       {/* Left: Chart */}
       <div style={{ flex: 3, padding: 20 }}>
-        <h2>Stock Price Chart (1 Year)</h2>
+        <h2>NVIDIA Corporation (NVDA)</h2>
         <ResponsiveContainer width="100%" height={400}>
           <LineChart
             data={stockData}
@@ -154,9 +154,6 @@ export default function ChartDisplay() {
           </LineChart>
         </ResponsiveContainer>
 
-        <div style={{ marginTop: 10, color: '#d9534f', fontWeight: 'bold' }}>
-          <i>Hover over the red shaded area to see business news.</i>
-        </div>
       </div>
 
       {/* Right: News panel */}
@@ -171,7 +168,7 @@ export default function ChartDisplay() {
           overflowY: 'auto',
         }}
       >
-        <h3>Relevant Business News</h3>
+        <h3>Release of DeepSeek Drove NVDA Down 17%</h3>
         {hovered ? (
           <ul>
             {sharpDropSegment.news.map((item, idx) => (
