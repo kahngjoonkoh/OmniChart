@@ -7,7 +7,7 @@ import {
 
 import LoginForm from './pages/LoginForm';
 import SignupForm from './pages/SignupForm';
-import SearchResult from './pages/SearchResult';
+import ChartDisplay from './pages/ChartDisplay';
 import Header from './components/Header';
 import ChartDisplay from './pages/ChartDisplay';
 
@@ -17,6 +17,7 @@ function App() {
     <Router>
       <nav>
         <Link to="/">Home</Link>
+        <Link to="/stocks/NVDA">View NVDA Chart</Link>
       </nav>
 
       <Routes>
