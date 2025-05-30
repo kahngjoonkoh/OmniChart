@@ -7,6 +7,7 @@ import {
 
 import LoginForm from './pages/LoginForm';
 import SignupForm from './pages/SignupForm';
+import SearchResult from './pages/SearchResult';
 import Header from './components/Header';
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginForm />} />
         <Route path="/signup" element={<SignupForm />} />
+        <Route path="/search" element={<SearchResult />} />
         <Route path="/" element={<Header isLoggedIn={true} />} />
       </Routes>
     </Router>

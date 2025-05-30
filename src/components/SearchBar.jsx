@@ -8,7 +8,7 @@ const SearchBar = ({ initialQuery = "" }) => {
 
   const search = (e) => {
     if (query !== initialQuery && query !== "") {
-      navigate("/search?q=" + query)
+      navigate("/search?q=" + encodeURIComponent(query))
     }
   }
 
