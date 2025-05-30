@@ -8,8 +8,8 @@ import {
 import LoginForm from './pages/LoginForm';
 import SignupForm from './pages/SignupForm';
 import ChartDisplay from './pages/ChartDisplay';
+import SearchResult from './pages/SearchResult';
 import Header from './components/Header';
-import ChartDisplay from './pages/ChartDisplay';
 
 function App() {
 
