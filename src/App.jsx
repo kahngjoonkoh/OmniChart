@@ -15,7 +15,7 @@ function App() {
     <Router>
       <nav>
         <Link to="/">Home</Link>
-        <Link to="/stocks/AAPL">View AAPL Chart</Link>
+        <Link to="/stocks/NVDA">View NVDA Chart</Link>
       </nav>
 
 
