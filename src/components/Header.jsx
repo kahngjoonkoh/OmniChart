@@ -10,7 +10,7 @@ const Header = ({ isLoggedIn, initialQuery = "" }) => {
 
   return (
     <div>
-      <h5>OmniChart with Jamie</h5>
+      <h5>OmniChart</h5>
       <SearchBar initialQuery={initialQuery} />
       <div>
         {isLoggedIn ? (
