@@ -117,6 +117,7 @@ const sharpDropSegment = {
     "Drop triggered by DeepSeek’s R1 AI model, rivaling Western models at lower cost.",
     "R1 was trained using stockpiled NVIDIA GPUs, raising demand concerns.",
   ],
+  tags: ["DeepSeek", "Artificial intelligence"],
 };
 
 export default function ChartDisplay() {
@@ -180,6 +181,19 @@ export default function ChartDisplay() {
         ) : (
           <p style={{ color: '#aaa' }}>Hover over the chart segment to see news here.</p>
         )}
+
+        {/* News panel: Tags */}
+        {hovered ? (
+          sharpDropSegment.tags
+            .map((item, _idx) => (
+              <span style={{
+                padding: "5px",
+                margin: "5px",
+                background: "lightgrey",
+              }}>{
+                  <a href="https://www.example.com">{item}</a>
+                }</span>))
+        ) : (<div></div>)}
       </div>
     </div>
   );
