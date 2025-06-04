@@ -24,7 +24,7 @@ function App() {
         <Route path="/login" element={<LoginForm />} />
         <Route path="/signup" element={<SignupForm />} />
         <Route path="/search" element={<SearchResult />} />
-        <Route path="/stocks/:symbol" element={<ChartDisplay />} />
+        <Route path="/stocks/:ticker" element={<ChartDisplay />} />
         <Route path="/" element={<Header isLoggedIn={true} />} />
       </Routes>
     </Router>

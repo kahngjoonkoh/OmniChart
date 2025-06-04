@@ -145,31 +145,83 @@ import {
 } from 'recharts';
 import SegmentHighlighter from '../components/SegmentHighlight';
 import NewsPanel from '../components/NewsPanel';
+import { data, useParams } from 'react-router-dom';
 import axios from 'axios';
 
-const generateStockData = () => {
-  const data = [];
-  let price = 150;
-  let date = new Date();
-  date.setFullYear(date.getFullYear() - 1);
-  for (let i = 0; i < 252; i++) {
-    price += (Math.random() - 0.5) * 2;
-    data.push({ date: date.toISOString().slice(0, 10), price: parseFloat(price.toFixed(2)) });
-    date.setDate(date.getDate() + 1);
+const baseUrl = import.meta.env.VITE_API_URL;
+
+const generateStockData = async (ticker) => {
+  if (!ticker) {
+    console.error("Error: Ticker symbol is undefined or empty. Cannot fetch stock data.");
+    return []; // Return an empty array immediately
   }
-  return data;
+  try {
+    console.log("HIHIH")
+    console.log(ticker)
+    const response = await fetch(`${baseUrl}/bars/${ticker}`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch stock data: ${response.status} ${response.statusText}`);
+    }
+    const apiData = await response.json();
+
+    const formattedData = apiData.map(bar => ({
+      date: new Date(bar.t).toISOString().slice(0, 10),
+      price: parseFloat(bar.c.toFixed(2)),
+    }));
+    console.log(formattedData)
+    // // Format the fetched data for Lightweight Charts Candlestick Series
+    // // Expected format: { time: Unix timestamp in seconds, open: ..., high: ..., low: ..., close: ... }
+    // const formattedData = apiData.map(bar => ({
+    //   time: new Date(bar.t).getTime() / 1000, // Convert ISO string ('t') to Unix timestamp (seconds)
+    //   open: parseFloat(bar.o),   // 'o' for open
+    //   high: parseFloat(bar.h),   // 'h' for high
+    //   low: parseFloat(bar.l),     // 'l' for low
+    //   close: parseFloat(bar.c), // 'c' for close
+    // }));
+
+    return formattedData;
+  } catch (error) {
+    console.error('Error in generateStockData:', error);
+    return []; // Return an empty array on error to prevent chart issues
+  }
 };
 
 export default function ChartDisplay() {
-  const [stockData] = useState(generateStockData());
+  const { ticker } = useParams();
+  console.log("HIHIHIFAS")
+  console.log(ticker)
+  const [stockData, setStockData] = useState([]);
+  const [stockName, setStockName] = useState([])
   const [segments, setSegments] = useState([]);
   const [selectedSegmentId, setSelectedSegmentId] = useState(null);
-  const ticker = "NVDA";
+
+  useEffect(() => {
+    async function fetchStockData() {
+      console.log("Fetching stock data for ticker:", ticker);
+      const data = await generateStockData(ticker);
+      setStockData(data);
+    }
+
+    if (ticker) { // Only fetch if ticker is available
+      fetchStockData();
+    }
+  }, [ticker]);
+
+  useEffect(() => {
+    async function fetchStockName() {
+      const res = await axios.get(`${baseUrl}/search?q=${ticker}`);
+      const data = res.data
+      setStockName(data.stocks[0].name)
+    }
+    if (ticker) {
+      fetchStockName();
+    }
+  }, [ticker])
 
   useEffect(() => {
     async function fetchTickerEvents() {
       try {
-        const res = await axios.get(`http://localhost:8080/api/v1/events/${ticker}`);
+        const res = await axios.get(`${baseUrl}/events/${ticker}`);
         const events = res.data;
 
         console.log('Fetched ticker_events:', events);
@@ -223,7 +275,7 @@ export default function ChartDisplay() {
   return (
     <div style={{ display: 'flex', height: '100vh', fontFamily: 'Arial, sans-serif' }}>
       <div style={{ flex: 3, padding: 20 }}>
-        <h2>NVIDIA Corporation (NVDA)</h2>
+        <h2>{ticker ? `${stockName} (${ticker.toUpperCase()})` : 'Loading...'}</h2>
         <ResponsiveContainer width="100%" height={400}>
           <LineChart data={stockData}>
             <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
