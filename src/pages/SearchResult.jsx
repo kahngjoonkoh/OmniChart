@@ -1,33 +1,53 @@
-import { useLocation, useNavigate } from 'react-router-dom'
-import Header from '../components/Header'
+import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import Header from '../components/Header';
 
-const useQuery = () => new URLSearchParams(useLocation().search)
+const baseUrl = import.meta.env.VITE_API_URL;
+
+const useQuery = () => new URLSearchParams(useLocation().search);
 
 const SearchResult = () => {
-  const query = decodeURIComponent(useQuery().get("q"));
-  const tickers = [
-    { name: 'NVIDIA Corporation', symbol: 'NVDA' },
-    { name: 'Taiwan Semiconductor Manufacturing Company Limited', symbol: 'TSM' },
-    { name: 'VanEck Semiconductor ETF', symbol: 'SMH' }
-  ];
-  const tickerComponents = tickers.map(ticker =>
-    <li key={ticker.symbol}>
-      <div>
-        <a href={"/stocks/" + ticker.symbol}>
-          {ticker.name + ' (' + ticker.symbol + ')'}
-        </a>
-      </div>
-    </li>
-  );
+  const query = decodeURIComponent(useQuery().get("q") || "");
+  const [tickers, setTickers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!query) return;
+    setLoading(true);
+    setError(null);
+
+    fetch(`${baseUrl}/search?q=${encodeURIComponent(query)}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch");
+        return res.json();
+      })
+      .then((data) => {
+        setTickers(data.stocks || []);
+      })
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, [query]);
 
   return (
     <>
       <Header isLoggedIn={false} initialQuery={query} />
       <div>
-        <ul>{tickerComponents}</ul>
+        {loading && <p>Loading results for "{query}"...</p>}
+        {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+        {!loading && tickers.length === 0 && <p>No results found for "{query}".</p>}
+        <ul>
+          {tickers.map((ticker) => (
+            <li key={ticker.ticker}>
+              <a href={`/stocks/${ticker.ticker}`}>
+                {ticker.name} ({ticker.ticker})
+              </a>
+            </li>
+          ))}
+        </ul>
       </div>
     </>
-  )
-}
+  );
+};
 
 export default SearchResult;
