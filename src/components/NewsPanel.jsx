@@ -73,51 +73,59 @@ import React, { useEffect, useState } from 'react';
 import CommentSection from './CommentSection';
 import axios from 'axios';
 
-export default function NewsPanel({ segment }) {
-  const [comments, setComments] = useState([]);
+// function NewsPanel(segment) {
+//   const [comments, setComments] = useState([]);
 
-  useEffect(() => {
-    async function fetchComments() {
-      try {
-        const res = await axios.get(`/api/v1/comments/${segment.id}`);
-        setComments(res.data); // Assume API returns an array of { content, ... }
-      } catch (err) {
-        console.error('Failed to fetch comments:', err);
-      }
-    }
+//   useEffect(() => {
+//     async function fetchComments() {
+//       try {
+//         const res = await axios.get(`/api/v1/comments/${segment.id}`);
+//         setComments(res.data); // Assume API returns an array of { content, ... }
+//       } catch (err) {
+//         console.error('Failed to fetch comments:', err);
+//       }
+//     }
 
-    fetchComments();
-  }, [segment.id]);
+//     fetchComments();
+//   }, [segment.id]);
 
-  const handleAddComment = async (text) => {
-    try {
-      const res = await axios.post('/api/v1/comments', {
-        content: text,
-        ticker_event_id: segment.id,
-        user_id: 'demo_user', // Replace with actual user ID in real app
-      });
+//   const handleAddComment = async (text) => {
+//     try {
+//       const res = await axios.post('/api/v1/comments', {
+//         content: text,
+//         ticker_event_id: segment.id,
+//         user_id: 'demo_user', // Replace with actual user ID in real app
+//       });
 
-      setComments((prev) => [...prev, res.data]); // Append the newly created comment
-    } catch (err) {
-      console.error('Failed to post comment:', err);
-    }
-  };
+//       setComments((prev) => [...prev, res.data]); // Append the newly created comment
+//     } catch (err) {
+//       console.error('Failed to post comment:', err);
+//     }
+//   };
 
-  return (
-    <div style={{ flex: 1, borderLeft: '1px solid #ccc', padding: 20, backgroundColor: '#f9f9f9', overflowY: 'auto' }}>
-      <h3>{segment.title}</h3>
-      <ul>
-        {segment.news.map((item, idx) => (
-          <li key={idx} style={{ marginBottom: 10 }}>
-            <div>{item}</div>
-          </li>
-        ))}
-      </ul>
+//   return (
+//     <div style={{ flex: 1, borderLeft: '1px solid #ccc', padding: 20, backgroundColor: '#f9f9f9', overflowY: 'auto' }}>
+//       <h3>{segment.title}</h3>
+//       <ul>
+//         {segment.news.map((item, idx) => (
+//           <li key={idx} style={{ marginBottom: 10 }}>
+//             <div>{item}</div>
+//           </li>
+//         ))}
+//       </ul>
 
-      <CommentSection
-        comments={comments}
-        onAdd={handleAddComment}
-      />
-    </div>
-  );
+//       <CommentSection
+//         comments={comments}
+//         onAdd={handleAddComment}
+//       />
+//     </div>
+//   );
+// }
+
+// export default NewsPanel;
+
+function NewsPanel(segment){
+  console.log("get them: ", segment.id);
 }
+
+export default NewsPanel;

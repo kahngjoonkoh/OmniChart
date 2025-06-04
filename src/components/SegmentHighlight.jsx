@@ -4,6 +4,7 @@ import { ReferenceArea } from 'recharts';
 
 function SegmentHighlighter(segment, data, isSelected, onClick) {
   console.log("this is executed!(500)");
+  console.log(segment.id);
 
   const startObj = data[segment.startIndex];
   const endObj   = data[segment.endIndex];

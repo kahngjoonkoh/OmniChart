@@ -166,11 +166,8 @@ export default function ChartDisplay() {
   const [selectedSegmentId, setSelectedSegmentId] = useState(null);
   const ticker = "NVDA";
 
-  console.log("this is executed!(1)");
-
   useEffect(() => {
     async function fetchTickerEvents() {
-      console.log("this is executed!(1.1)");
       try {
         const res = await axios.get(`http://localhost:8080/api/v1/events/${ticker}`);
         const events = res.data;
@@ -180,6 +177,7 @@ export default function ChartDisplay() {
         // Fetch associated events for each ticker_event
         const enrichedSegments = await Promise.all(events.map(async (event) => {
           try {
+                    console.log("executed here 1000");
             return {
               id: event.id,
               startIndex: event.start_index,
@@ -198,25 +196,29 @@ export default function ChartDisplay() {
             };
           }
         }));
+        console.log("executed here");
 
         console.log('Enriched segments:', enrichedSegments);
         setSegments(enrichedSegments);
 
-        if (enrichedSegments.length > 0) {
+        console.log("segment length:", segments.length);
+
+        if (segments.length > 0) {
+          console.log("this works");
           setSelectedSegmentId(enrichedSegments[0].id);
         }
       } catch (err) {
         console.error("Error fetching ticker events", err);
       }
     }
-
-    console.log("this is executed!(100)");
-    fetchTickerEvents();
+    if (ticker) {
+      fetchTickerEvents();
+    }
   }, [ticker]);
 
   const selectedSegment = segments.find((seg) => seg.id === selectedSegmentId);
 
-  console.log("this is executed!(2)");
+  // console.log("this truly is:", selectedSegment.id);
 
   return (
     <div style={{ display: 'flex', height: '100vh', fontFamily: 'Arial, sans-serif' }}>
@@ -257,7 +259,9 @@ export default function ChartDisplay() {
         </div>
       </div>
 
-      {/* <NewsPanel segment={selectedSegment} /> */}
+      <NewsPanel {...segments[0]} />
+
+      {/* {segments.map((segment) => NewsPanel(segment))} */}
     </div>
   );
 }
