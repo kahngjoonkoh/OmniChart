@@ -73,59 +73,73 @@ import React, { useEffect, useState } from 'react';
 import CommentSection from './CommentSection';
 import axios from 'axios';
 
-// function NewsPanel(segment) {
-//   const [comments, setComments] = useState([]);
+function SplitNews({news}) {
+if (!news) {
+  return null; // or a loading spinner
+}
 
-//   useEffect(() => {
-//     async function fetchComments() {
-//       try {
-//         const res = await axios.get(`/api/v1/comments/${segment.id}`);
-//         setComments(res.data); // Assume API returns an array of { content, ... }
-//       } catch (err) {
-//         console.error('Failed to fetch comments:', err);
-//       }
-//     }
+return (
+  <ul>
+    {news
+      .split(".")
+      .map(item => item.trim())
+      .filter(item => item.length > 0)
+      .map((item, idx) => (
+        <li key={idx} style={{ marginBottom: 10 }}>
+          <div>{item}.</div>
+        </li>
+      ))}
+  </ul>
+);
+}
 
-//     fetchComments();
-//   }, [segment.id]);
+function NewsPanel({ id, startIndex, endIndex, title, news }) {
+  const [comments, setComments] = useState([]);
 
-//   const handleAddComment = async (text) => {
-//     try {
-//       const res = await axios.post('/api/v1/comments', {
-//         content: text,
-//         ticker_event_id: segment.id,
-//         user_id: 'demo_user', // Replace with actual user ID in real app
-//       });
+  useEffect(() => {
+    async function fetchComments() {
+      try {
+        const res = await axios.get(`/api/v1/comments/${id}`);
+        setComments(res.data); // Assume API returns an array of { content, ... }
+      } catch (err) {
+        console.error('Failed to fetch comments:', err);
+      }
+    }
 
-//       setComments((prev) => [...prev, res.data]); // Append the newly created comment
-//     } catch (err) {
-//       console.error('Failed to post comment:', err);
-//     }
-//   };
+    fetchComments();
+  }, [id]);
 
-//   return (
-//     <div style={{ flex: 1, borderLeft: '1px solid #ccc', padding: 20, backgroundColor: '#f9f9f9', overflowY: 'auto' }}>
-//       <h3>{segment.title}</h3>
-//       <ul>
-//         {segment.news.map((item, idx) => (
-//           <li key={idx} style={{ marginBottom: 10 }}>
-//             <div>{item}</div>
-//           </li>
-//         ))}
-//       </ul>
+  const handleAddComment = async (text) => {
+    try {
+      const res = await axios.post('/api/v1/comments', {
+        content: text,
+        ticker_event_id: id,
+        user_id: 'demo_user', // Replace with actual user ID in real app
+      });
 
-//       <CommentSection
-//         comments={comments}
-//         onAdd={handleAddComment}
-//       />
-//     </div>
-//   );
-// }
+      setComments((prev) => [...prev, res.data]); // Append the newly created comment
+    } catch (err) {
+      console.error('Failed to post comment:', err);
+    }
+  };
 
-// export default NewsPanel;
+  return (
+    <div style={{ flex: 1, borderLeft: '1px solid #ccc', padding: 20, backgroundColor: '#f9f9f9', overflowY: 'auto' }}>
+      <h3>{title}</h3>
+      <SplitNews news = {news} />
 
-function NewsPanel(segment){
-  console.log("get them: ", segment.id);
+      <CommentSection
+        comments={comments}
+        onAdd={handleAddComment}
+      />
+    </div>
+  );
 }
 
 export default NewsPanel;
+
+// function NewsPanel(segment){
+//   console.log("get them: ", segment.id);
+// }
+
+// export default NewsPanel;

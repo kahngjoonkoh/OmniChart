@@ -229,7 +229,7 @@ export default function ChartDisplay() {
         // Fetch associated events for each ticker_event
         const enrichedSegments = await Promise.all(events.map(async (event) => {
           try {
-                    console.log("executed here 1000");
+            console.log("executed here 1000");
             return {
               id: event.id,
               startIndex: event.start_index,
@@ -311,9 +311,11 @@ export default function ChartDisplay() {
         </div>
       </div>
 
-      <NewsPanel {...segments[0]} />
+      {/* <NewsPanel {...selectedSegment} /> */}
+      {/* {NewsPanel(selectedSegment)} */}
 
       {/* {segments.map((segment) => NewsPanel(segment))} */}
+      <NewsPanel {...selectedSegment} />
     </div>
   );
 }
