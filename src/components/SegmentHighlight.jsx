@@ -3,6 +3,8 @@ import React from 'react';
 import { ReferenceArea } from 'recharts';
 
 function SegmentHighlighter(segment, data, isSelected, onClick) {
+  console.log("this is executed!(500)");
+
   const startObj = data[segment.startIndex];
   const endObj   = data[segment.endIndex];
 

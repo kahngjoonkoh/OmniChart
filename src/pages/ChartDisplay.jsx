@@ -166,24 +166,26 @@ export default function ChartDisplay() {
   const [selectedSegmentId, setSelectedSegmentId] = useState(null);
   const ticker = "NVDA";
 
+  console.log("this is executed!(1)");
+
   useEffect(() => {
     async function fetchTickerEvents() {
+      console.log("this is executed!(1.1)");
       try {
-        const res = await axios.get(`/api/v1/ticker_events/${ticker}`);
+        const res = await axios.get(`http://localhost:8080/api/v1/events/${ticker}`);
         const events = res.data;
+
+        console.log('Fetched ticker_events:', events);
 
         // Fetch associated events for each ticker_event
         const enrichedSegments = await Promise.all(events.map(async (event) => {
           try {
-            const eventRes = await axios.get(`/api/v1/events/${event.event_id}`);
-            const eventDetails = eventRes.data;
-
             return {
               id: event.id,
               startIndex: event.start_index,
               endIndex: event.end_index,
-              title: eventDetails.title ?? "Untitled",
-              news: eventDetails.content ? eventDetails.content.split("\n") : []
+              title: event.events.title ?? "Untitled",
+              news: event.events.content ? eventDetails.content.split("\n") : []
             };
           } catch (innerErr) {
             console.error(`Failed to fetch event ${event.event_id}:`, innerErr);
@@ -197,7 +199,9 @@ export default function ChartDisplay() {
           }
         }));
 
+        console.log('Enriched segments:', enrichedSegments);
         setSegments(enrichedSegments);
+
         if (enrichedSegments.length > 0) {
           setSelectedSegmentId(enrichedSegments[0].id);
         }
@@ -206,10 +210,13 @@ export default function ChartDisplay() {
       }
     }
 
+    console.log("this is executed!(100)");
     fetchTickerEvents();
   }, [ticker]);
 
-  const selectedSegment = segments.find(seg => seg.id === selectedSegmentId);
+  const selectedSegment = segments.find((seg) => seg.id === selectedSegmentId);
+
+  console.log("this is executed!(2)");
 
   return (
     <div style={{ display: 'flex', height: '100vh', fontFamily: 'Arial, sans-serif' }}>
@@ -222,7 +229,7 @@ export default function ChartDisplay() {
             <YAxis domain={['dataMin - 10', 'dataMax + 10']} />
             <Tooltip />
             <Line type="monotone" dataKey="price" stroke="#007bff" dot={false} />
-            {segments.map(segment =>
+            {segments.map((segment) =>
               SegmentHighlighter(
                 segment,
                 stockData,
@@ -232,8 +239,25 @@ export default function ChartDisplay() {
             )}
           </LineChart>
         </ResponsiveContainer>
+
+        {/* Debug: show the raw segments returned from the API */}
+        <div style={{ marginTop: 20, color: '#555' }}>
+          <h4>Debug: Fetched Segments Data</h4>
+          <pre
+            style={{
+              maxHeight: 200,
+              overflowY: 'auto',
+              backgroundColor: '#f0f0f0',
+              padding: 10,
+              borderRadius: 4,
+            }}
+          >
+            {JSON.stringify(segments, null, 2)}
+          </pre>
+        </div>
       </div>
-      <NewsPanel segment={selectedSegment} />
+
+      {/* <NewsPanel segment={selectedSegment} /> */}
     </div>
   );
 }
