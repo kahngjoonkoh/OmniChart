@@ -184,8 +184,8 @@ export default function ChartDisplay() {
               id: event.id,
               startIndex: event.start_index,
               endIndex: event.end_index,
-              title: event.events.title ?? "Untitled",
-              news: event.events.content ? eventDetails.content.split("\n") : []
+              title: event.events.title,
+              news: event.events.content
             };
           } catch (innerErr) {
             console.error(`Failed to fetch event ${event.event_id}:`, innerErr);
