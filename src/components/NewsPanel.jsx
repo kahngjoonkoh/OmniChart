@@ -126,7 +126,7 @@ function NewsPanel({ id, startIndex, endIndex, title, news }) {
   };
 
   return (
-    <div style={{ flex: 1, borderLeft: '1px solid #ccc', padding: 20, backgroundColor: '#f9f9f9', overflowY: 'auto' }}>
+    <div style={{ flex: 1, borderLeft: '1px solid #ccc', padding: 20, overflowY: 'auto' }}>
       <h3>{title}</h3>
       <SplitNews news = {news} />
 
