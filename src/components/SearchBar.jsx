@@ -16,7 +16,8 @@ const SearchBar = ({ initialQuery = "" }) => {
     <div>
       <input
         type="text"
-        placeholder="Search ..."
+        placeholder="Search Ticker (e.g., AAPL, NVDA)"
+         className="w-full border rounded"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         onKeyDown={(e) => {

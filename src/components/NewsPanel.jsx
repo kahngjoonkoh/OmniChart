@@ -73,6 +73,8 @@ import React, { useEffect, useState } from 'react';
 import CommentSection from './CommentSection';
 import axios from 'axios';
 
+const baseUrl = import.meta.env.VITE_API_URL;
+
 function SplitNews({news}) {
 if (!news) {
   return null; // or a loading spinner
@@ -99,7 +101,7 @@ function NewsPanel({ id, startIndex, endIndex, title, news }) {
   useEffect(() => {
     async function fetchComments() {
       try {
-        const res = await axios.get(`localhost:8080/api/v1/comments/${id}`);
+        const res = await axios.get(`${baseUrl}/comments/${id}`);
         setComments(res.data); // Assume API returns an array of { content, ... }
       } catch (err) {
         console.error('Failed to fetch comments:', err);
@@ -111,7 +113,7 @@ function NewsPanel({ id, startIndex, endIndex, title, news }) {
 
   const handleAddComment = async (text) => {
     try {
-      const res = await axios.post('/api/v1/comments', {
+      const res = await axios.post(`${baseUrl}/comments`, {
         content: text,
         ticker_event_id: id,
         user_id: 'demo_user', // Replace with actual user ID in real app
@@ -124,7 +126,7 @@ function NewsPanel({ id, startIndex, endIndex, title, news }) {
   };
 
   return (
-    <div style={{ flex: 1, borderLeft: '1px solid #ccc', padding: 20, backgroundColor: '#f9f9f9', overflowY: 'auto' }}>
+    <div style={{ flex: 1, borderLeft: '1px solid #ccc', padding: 20, overflowY: 'auto' }}>
       <h3>{title}</h3>
       <SplitNews news = {news} />
 
