@@ -113,10 +113,10 @@ function NewsPanel({ id, startIndex, endIndex, title, news }) {
 
   const handleAddComment = async (text) => {
     try {
-      const res = await axios.post(`${baseUrl}/comments`, {
+      const res = await axios.post(`http://localhost:8080/api/v1/comments`, {
         content: text,
         ticker_event_id: id,
-        user_id: 'demo_user', // Replace with actual user ID in real app
+        user_id: '743eea30-f699-4734-9cc1-3cedd832ba69', // Replace with actual user ID in real app
       });
 
       setComments((prev) => [...prev, res.data]); // Append the newly created comment
