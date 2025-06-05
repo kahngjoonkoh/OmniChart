@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom'
 
+const baseUrl = import.meta.env.VITE_API_URL;
+
 function SignupForm() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -10,7 +12,7 @@ function SignupForm() {
   const signup = (e) => {
     // Call APIs to create new user
     e.preventDefault();
-    fetch('/api/signup', {
+    fetch(`${baseUrl}/signup`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
