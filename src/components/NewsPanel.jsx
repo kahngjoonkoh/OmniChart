@@ -99,7 +99,7 @@ function NewsPanel({ id, startIndex, endIndex, title, news }) {
   useEffect(() => {
     async function fetchComments() {
       try {
-        const res = await axios.get(`/api/v1/comments/${id}`);
+        const res = await axios.get(`localhost:8080/api/v1/comments/${id}`);
         setComments(res.data); // Assume API returns an array of { content, ... }
       } catch (err) {
         console.error('Failed to fetch comments:', err);
