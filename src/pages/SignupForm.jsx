@@ -10,8 +10,30 @@ function SignupForm() {
   const signup = (e) => {
     // Call APIs to create new user
     e.preventDefault();
-    console.log("Submitted: ", { username, password, email });
-    navigate('/');
+    fetch('/api/signup', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include',
+      body: JSON.stringify({
+        username: username,
+        password: password,
+        email: email
+      })
+    })
+      .then(response => {
+        response.json().then((data => {
+          if (!response.ok) {
+            alert(data.error);
+            return;
+          }
+          navigate('/');
+        }))
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
   }
 
   return (
