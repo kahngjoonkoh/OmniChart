@@ -17,7 +17,7 @@ const SearchResult = () => {
     setLoading(true);
     setError(null);
 
-    fetch(`/api/search?q=${encodeURIComponent(query)}`)
+    fetch(`${baseUrl}/search?q=${encodeURIComponent(query)}`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch");
         return res.json();

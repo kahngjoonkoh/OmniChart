@@ -11,7 +11,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://omnichart-server.impaas.uk/api/v1',
+        target: 'http://localhost:8080/api/v1',
         changeOrigin: true,
         rewrite: path => path.replace(/^\/api/, '')
       }

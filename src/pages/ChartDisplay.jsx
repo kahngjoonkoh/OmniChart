@@ -158,7 +158,7 @@ const generateStockData = async (ticker) => {
   try {
     console.log("HIHIH")
     console.log(ticker)
-    const response = await fetch(`/api/bars/${ticker}`);
+    const response = await fetch(`${baseUrl}/bars/${ticker}`);
     if (!response.ok) {
       throw new Error(`Failed to fetch stock data: ${response.status} ${response.statusText}`);
     }
@@ -209,7 +209,7 @@ export default function ChartDisplay() {
 
   useEffect(() => {
     async function fetchStockName() {
-      const res = await axios.get(`/search?q=${ticker}`);
+      const res = await axios.get(`${baseUrl}/search?q=${ticker}`);
       const data = res.data
       setStockName(data.stocks[0].name)
     }
@@ -221,7 +221,7 @@ export default function ChartDisplay() {
   useEffect(() => {
     async function fetchTickerEvents() {
       try {
-        const res = await axios.get(`/events/${ticker}`);
+        const res = await axios.get(`${baseUrl}/events/${ticker}`);
         const events = res.data;
 
         console.log('Fetched ticker_events:', events);
