@@ -101,7 +101,7 @@ function NewsPanel({ id, startIndex, endIndex, title, news }) {
   useEffect(() => {
     async function fetchComments() {
       try {
-        const res = await axios.get(`http://localhost:8080/api/v1/comments/${id}`);
+        const res = await axios.get(`${baseUrl}/comments/${id}`);
         setComments(res.data); // Assume API returns an array of { content, ... }
       } catch (err) {
         console.error('Failed to fetch comments:', err);
@@ -113,7 +113,7 @@ function NewsPanel({ id, startIndex, endIndex, title, news }) {
 
   const handleAddComment = async (text) => {
     try {
-      const res = await axios.post(`http://localhost:8080/api/v1/comments`, {
+      const res = await axios.post(`${baseUrl}/comments`, {
         content: text,
         ticker_event_id: id,
         user_id: '743eea30-f699-4734-9cc1-3cedd832ba69', // Replace with actual user ID in real app

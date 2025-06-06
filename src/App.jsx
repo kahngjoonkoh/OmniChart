@@ -19,7 +19,6 @@ function App() {
       <AuthProvider>
         <nav>
           <Link to="/">Home</Link>
-          <Link to="/stocks/NVDA">View NVDA Chart</Link>
         </nav>
 
         <Routes>

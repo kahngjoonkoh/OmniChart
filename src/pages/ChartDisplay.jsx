@@ -296,7 +296,7 @@ export default function ChartDisplay() {
         </ResponsiveContainer>
 
         {/* Debug: show the raw segments returned from the API */}
-        <div style={{ marginTop: 20, color: '#555' }}>
+        {/* <div style={{ marginTop: 20, color: '#555' }}>
           <h4>Debug: Fetched Segments Data</h4>
           <pre
             style={{
@@ -309,7 +309,7 @@ export default function ChartDisplay() {
           >
             {JSON.stringify(segments, null, 2)}
           </pre>
-        </div>
+        </div> */}
       </div>
 
       {/* <NewsPanel {...selectedSegment} /> */}
