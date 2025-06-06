@@ -1,16 +1,23 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+import { useAuth } from '../context/AuthContext'
 
 function LoginForm() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const auth = useAuth();
+
+  useEffect(() => {
+    if (auth.isLoggedIn()) {
+      navigate('/');
+    }
+  });
 
   const login = (e) => {
-    // Call APIs from backend to validate user
     e.preventDefault();
-    console.log("Submitted: ", { username, password });
-    navigate("/");
+    auth.loginUser(username, password);
   }
 
   return (

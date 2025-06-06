@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const baseUrl = import.meta.env.VITE_API_URL;
 
@@ -8,9 +9,16 @@ function SignupForm() {
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
   const navigate = useNavigate();
+  const auth = useAuth();
 
+  useEffect(() => {
+    if (auth.isLoggedIn()) {
+      navigate('/');
+    }
+  })
+
+  // Handler for sign up
   const signup = (e) => {
-    // Call APIs to create new user
     e.preventDefault();
     fetch(`${baseUrl}/signup`, {
       method: 'POST',
@@ -36,7 +44,7 @@ function SignupForm() {
       .catch(error => {
         console.error('Error:', error);
       });
-  }
+  };
 
   return (
     <>
@@ -75,7 +83,7 @@ function SignupForm() {
         <p>Already have an account? <a href="/login">Log in</a></p>
       </div>
     </>
-  )
+  );
 }
 
 export default SignupForm;

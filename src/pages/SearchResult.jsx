@@ -31,7 +31,7 @@ const SearchResult = () => {
 
   return (
     <>
-      <Header isLoggedIn={false} initialQuery={query} />
+      <Header initialQuery={query} />
       <div>
         {loading && <p>Loading results for "{query}"...</p>}
         {error && <p style={{ color: 'red' }}>Error: {error}</p>}

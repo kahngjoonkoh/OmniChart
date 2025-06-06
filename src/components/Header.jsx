@@ -1,20 +1,18 @@
 import { useNavigate } from 'react-router-dom'
 import SearchBar from './SearchBar'
+import { useAuth } from '../context/AuthContext'
 
-const Header = ({ isLoggedIn, initialQuery = "" }) => {
+const Header = ({ initialQuery = "" }) => {
   const navigate = useNavigate();
-
-  const logout = (e) => {
-    console.log("Log out");
-  }
+  const auth = useAuth();
 
   return (
     <div>
       <h5>OmniChart</h5>
       <SearchBar initialQuery={initialQuery} />
       <div>
-        {isLoggedIn ? (
-          <button onClick={logout}>Log out</button>
+        {auth.isLoggedIn() ? (
+          <button onClick={auth.logoutUser}>Log out</button>
         ) : (
           <>
             <button onClick={(e) => navigate("/signup")}>Sign up</button>
