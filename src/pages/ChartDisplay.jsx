@@ -221,6 +221,7 @@ export default function ChartDisplay() {
   useEffect(() => {
     async function fetchTickerEvents() {
       try {
+        console.log("THIS IS THE URL USED HEREREE:", `${baseUrl}/events/${ticker}`);
         const res = await axios.get(`${baseUrl}/events/${ticker}`);
         const events = res.data;
 

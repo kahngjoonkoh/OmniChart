@@ -101,7 +101,7 @@ function NewsPanel({ id, startIndex, endIndex, title, news }) {
   useEffect(() => {
     async function fetchComments() {
       try {
-        const res = await axios.get(`${baseUrl}/comments/${id}`);
+        const res = await axios.get(`http://localhost:8080/api/v1/comments/${id}`);
         setComments(res.data); // Assume API returns an array of { content, ... }
       } catch (err) {
         console.error('Failed to fetch comments:', err);
@@ -113,10 +113,10 @@ function NewsPanel({ id, startIndex, endIndex, title, news }) {
 
   const handleAddComment = async (text) => {
     try {
-      const res = await axios.post(`${baseUrl}/comments`, {
+      const res = await axios.post(`http://localhost:8080/api/v1/comments`, {
         content: text,
         ticker_event_id: id,
-        user_id: 'demo_user', // Replace with actual user ID in real app
+        user_id: '743eea30-f699-4734-9cc1-3cedd832ba69', // Replace with actual user ID in real app
       });
 
       setComments((prev) => [...prev, res.data]); // Append the newly created comment
@@ -127,7 +127,7 @@ function NewsPanel({ id, startIndex, endIndex, title, news }) {
 
   return (
     <div style={{ flex: 1, borderLeft: '1px solid #ccc', padding: 20, overflowY: 'auto' }}>
-      <h3>{title}</h3>
+      <h2>{title}</h2>
       <SplitNews news = {news} />
 
       <CommentSection
@@ -139,9 +139,3 @@ function NewsPanel({ id, startIndex, endIndex, title, news }) {
 }
 
 export default NewsPanel;
-
-// function NewsPanel(segment){
-//   console.log("get them: ", segment.id);
-// }
-
-// export default NewsPanel;
