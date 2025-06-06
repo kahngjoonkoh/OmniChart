@@ -221,7 +221,6 @@ export default function ChartDisplay() {
   useEffect(() => {
     async function fetchTickerEvents() {
       try {
-        console.log("THIS IS THE URL USED HEREREE:", `${baseUrl}/events/${ticker}`);
         const res = await axios.get(`${baseUrl}/events/${ticker}`);
         const events = res.data;
 
@@ -236,7 +235,8 @@ export default function ChartDisplay() {
               startIndex: event.start_index,
               endIndex: event.end_index,
               title: event.events.title,
-              news: event.events.content
+              news: event.events.content,
+              source_url: event.events.source_url
             };
           } catch (innerErr) {
             console.error(`Failed to fetch event ${event.event_id}:`, innerErr);
@@ -245,19 +245,16 @@ export default function ChartDisplay() {
               startIndex: event.start_index,
               endIndex: event.end_index,
               title: "Untitled",
-              news: []
+              news: [],
+              source_url: "None"
             };
           }
         }));
-        console.log("executed here");
 
-        console.log('Enriched segments:', enrichedSegments);
         setSegments(enrichedSegments);
 
-        console.log("segment length:", segments.length);
 
         if (segments.length > 0) {
-          console.log("this works");
           setSelectedSegmentId(enrichedSegments[0].id);
         }
       } catch (err) {
@@ -312,10 +309,6 @@ export default function ChartDisplay() {
         </div> */}
       </div>
 
-      {/* <NewsPanel {...selectedSegment} /> */}
-      {/* {NewsPanel(selectedSegment)} */}
-
-      {/* {segments.map((segment) => NewsPanel(segment))} */}
       <NewsPanel {...selectedSegment} />
     </div>
   );

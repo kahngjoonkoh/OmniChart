@@ -95,14 +95,14 @@ return (
 );
 }
 
-function NewsPanel({ id, startIndex, endIndex, title, news }) {
+function NewsPanel({ id, startIndex, endIndex, title, news, source_url }) {
   const [comments, setComments] = useState([]);
 
   useEffect(() => {
     async function fetchComments() {
       try {
         const res = await axios.get(`${baseUrl}/comments/${id}`);
-        setComments(res.data); // Assume API returns an array of { content, ... }
+        setComments(res.data);
       } catch (err) {
         console.error('Failed to fetch comments:', err);
       }
@@ -119,7 +119,7 @@ function NewsPanel({ id, startIndex, endIndex, title, news }) {
         user_id: '743eea30-f699-4734-9cc1-3cedd832ba69', // Replace with actual user ID in real app
       });
 
-      setComments((prev) => [...prev, res.data]); // Append the newly created comment
+      setComments((prev) => [...prev, res.data]);
     } catch (err) {
       console.error('Failed to post comment:', err);
     }
@@ -128,7 +128,16 @@ function NewsPanel({ id, startIndex, endIndex, title, news }) {
   return (
     <div style={{ flex: 1, borderLeft: '1px solid #ccc', padding: 20, overflowY: 'auto' }}>
       <h2>{title}</h2>
-      <SplitNews news = {news} />
+      <SplitNews news={news} />
+      
+      {source_url && (
+        <div style={{ marginTop: 10 }}>
+          <span style={{ fontWeight: 'bold' }}>Source: </span>
+          <a href={source_url} target="_blank" rel="noopener noreferrer" style={{ color: '#1a0dab' }}>
+            {source_url}
+          </a>
+        </div>
+      )}
 
       <CommentSection
         comments={comments}
