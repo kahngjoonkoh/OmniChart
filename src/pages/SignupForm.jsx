@@ -8,6 +8,9 @@ function SignupForm() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
   const navigate = useNavigate();
   const auth = useAuth();
 
@@ -15,74 +18,104 @@ function SignupForm() {
     if (auth.isLoggedIn()) {
       navigate('/');
     }
-  })
+  }, [auth, navigate]);
 
-  // Handler for sign up
   const signup = (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError(null);
+
     fetch(`${baseUrl}/signup`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       credentials: 'include',
-      body: JSON.stringify({
-        username: username,
-        password: password,
-        email: email
-      })
+      body: JSON.stringify({ username, password, email }),
     })
-      .then(response => {
-        response.json().then((data => {
+      .then((response) => {
+        response.json().then((data) => {
           if (!response.ok) {
-            alert(data.error);
+            setError(data.error || 'Signup failed.');
+            setLoading(false);
             return;
           }
           navigate('/');
-        }))
+        });
       })
-      .catch(error => {
+      .catch((error) => {
         console.error('Error:', error);
+        setError('Network error. Please try again.');
+        setLoading(false);
       });
   };
 
   return (
-    <>
-      <form onSubmit={signup}>
-      <h2>OmniChart</h2>
-        <div>
-          <label>Username</label>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        <button type="submit">Sign up</button>
-      </form>
-      <div>
-        <p>Already have an account? <a href="/login">Log in</a></p>
+    <div className="flex items-center justify-center mt-0 md:mt-[10%] px-4">
+      <div className="max-w-md w-full bg-white p-8 rounded-lg shadow">
+        <h2 className="text-3xl font-bold text-blue-600 text-center mb-6">Sign up for OmniChart</h2>
+
+        {error && (
+          <div className="bg-red-100 text-red-700 px-4 py-3 rounded mb-4 text-sm">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={signup} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Username</label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className={`w-full py-2 px-4 text-white font-semibold rounded ${
+              loading
+                ? 'bg-blue-300 cursor-not-allowed'
+                : 'bg-blue-600 hover:bg-blue-700 transition'
+            }`}
+          >
+            {loading ? 'Signing up...' : 'Sign up'}
+          </button>
+        </form>
+
+        <p className="text-center text-sm text-gray-600 mt-4">
+          Already have an account?{' '}
+          <a href="/login" className="text-blue-600 hover:underline">
+            Log in
+          </a>
+        </p>
       </div>
-    </>
+    </div>
   );
 }
 

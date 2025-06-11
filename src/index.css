@@ -1,4 +1,17 @@
 @import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Optional: add your base theme styles here */
+body {
+  @apply bg-white text-gray-900 m-0;
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+/* 
 
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -67,4 +80,4 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
-}
+} */
