@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth, supabase } from '../context/AuthContext';
 
 const baseUrl = import.meta.env.VITE_API_URL;
 
@@ -20,34 +20,33 @@ function SignupForm() {
     }
   }, [auth, navigate]);
 
-  const signup = (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
-    fetch(`${baseUrl}/signup`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify({ username, password, email }),
+    const { error } = await supabase.auth.signUp({
+      email: email,
+      password: password,
+      options: {
+        data: {
+          username: username,
+        }
+      }
     })
-      .then((response) => {
-        response.json().then((data) => {
-          if (!response.ok) {
-            setError(data.error || 'Signup failed.');
-            setLoading(false);
-            return;
-          }
-          navigate('/');
-        });
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-        setError('Network error. Please try again.');
-        setLoading(false);
-      });
+    if (error) {
+      if (error.message == "User already registered") {
+        setError("Email already registered");
+      } else if (error.message == "Database error saving new user") {
+        setError("Username already registered");
+      } else {
+        setError(error.message);
+      }
+      setLoading(false);
+      return;
+    }
+    setLoading(false);
+    navigate('/');
   };
 
   return (
@@ -61,9 +60,9 @@ function SignupForm() {
           </div>
         )}
 
-        <form onSubmit={signup} className="space-y-4">
+        <form onSubmit={handleSignup} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Username</label>
+            <label className="block text-sm font-semibold text-gray-700">Username</label>
             <input
               type="text"
               value={username}
@@ -74,7 +73,7 @@ function SignupForm() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Password</label>
+            <label className="block text-sm font-semibold text-gray-700">Password</label>
             <input
               type="password"
               value={password}
@@ -85,7 +84,7 @@ function SignupForm() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Email</label>
+            <label className="block text-sm font-semibold text-gray-700">Email</label>
             <input
               type="email"
               value={email}

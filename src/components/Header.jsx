@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth, supabase } from '../context/AuthContext';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid'; // Make sure heroicons is installed
 import { useState } from 'react';
 
@@ -13,6 +13,12 @@ const Header = ({ initialQuery = "" }) => {
       navigate(`/search?q=${encodeURIComponent(query.trim())}`);
     }
   };
+
+  const logoutHandler = () => {
+    supabase.auth.signOut();
+    alert("You have successfully logged out");
+    navigate('/');
+  }
 
   return (
     <header className="w-full bg-white shadow px-6 py-4 sticky top-0 z-50">
@@ -47,7 +53,7 @@ const Header = ({ initialQuery = "" }) => {
         <div className="flex gap-2 ml-auto">
           {auth.isLoggedIn() ? (
             <button
-              onClick={auth.logoutUser}
+              onClick={logoutHandler}
               className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
             >
               Log out

@@ -5,23 +5,23 @@ import axios from 'axios';
 const baseUrl = import.meta.env.VITE_API_URL;
 
 function SplitNews({news}) {
-if (!news) {
-  return null; // or a loading spinner
-}
+  if (!news) {
+    return null; // or a loading spinner
+  }
 
-return (
-  <ul>
-    {news
-      .split(".")
-      .map(item => item.trim())
-      .filter(item => item.length > 0)
-      .map((item, idx) => (
-        <li key={idx} style={{ marginBottom: 10 }}>
-          <div>{item}.</div>
-        </li>
-      ))}
-  </ul>
-);
+  return (
+    <ul>
+      {news
+        .split(".")
+        .map(item => item.trim())
+        .filter(item => item.length > 0)
+        .map((item, idx) => (
+          <li key={idx} style={{ marginBottom: 10 }}>
+            <div>{item}.</div>
+          </li>
+        ))}
+    </ul>
+  );
 }
 
 function NewsPanel({ id, startIndex, endIndex, title, news, source_url }) {
