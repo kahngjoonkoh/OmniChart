@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, supabase } from '../context/AuthContext';
 
-const baseUrl = import.meta.env.VITE_API_URL;
-
 function SignupForm() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');

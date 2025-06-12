@@ -1,5 +1,5 @@
 // below is version that uses database:
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer
 } from 'recharts';
@@ -7,6 +7,8 @@ import SegmentHighlighter from '../components/SegmentHighlight';
 import NewsPanel from '../components/NewsPanel';
 import { data, useParams } from 'react-router-dom';
 import axios from 'axios';
+
+import { useAuth } from '../context/AuthContext';
 
 const baseUrl = import.meta.env.VITE_API_URL;
 
@@ -16,8 +18,6 @@ const generateStockData = async (ticker) => {
     return []; // Return an empty array immediately
   }
   try {
-    console.log("HIHIH")
-    console.log(ticker)
     const response = await fetch(`${baseUrl}/bars/${ticker}`);
     if (!response.ok) {
       throw new Error(`Failed to fetch stock data: ${response.status} ${response.statusText}`);
@@ -48,17 +48,16 @@ const generateStockData = async (ticker) => {
 
 export default function ChartDisplay() {
   const { ticker } = useParams();
-  console.log("HIHIHIFAS")
-  console.log(ticker)
   const [stockData, setStockData] = useState([]);
   const [stockName, setStockName] = useState([])
   const [segments, setSegments] = useState([]);
   const [selectedSegmentId, setSelectedSegmentId] = useState(null);
+  const [inWatchlist, setInWatchlist] = useState(null);
+  const auth = useAuth();
 
   // for getting beta/risk level
   const [beta, setBeta] = useState(null);
   const [riskCategory, setRiskCategory] = useState('');
-
 
   useEffect(() => {
     async function fetchStockData() {
@@ -94,7 +93,6 @@ export default function ChartDisplay() {
         // Fetch associated events for each ticker_event
         const enrichedSegments = await Promise.all(events.map(async (event) => {
           try {
-            console.log("executed here 1000");
             return {
               id: event.id,
               startIndex: event.start_index,
@@ -132,21 +130,78 @@ export default function ChartDisplay() {
   }, [ticker]);
 
   useEffect(() => {
-  async function fetchBetaAndRisk() {
-    try {
-      const res = await axios.get(`http://localhost:8080/api/v1/beta/${ticker}`);
-      setBeta(res.data.beta);
-      setRiskCategory(res.data.riskCategory);
-    } catch (err) {
-      console.error("Failed to fetch beta and risk category", err);
+    async function fetchBetaAndRisk() {
+      try {
+        const res = await axios.get(`${baseUrl}/beta/${ticker}`);
+        setBeta(res.data.beta);
+        setRiskCategory(res.data.riskCategory);
+      } catch (err) {
+        console.error("Failed to fetch beta and risk category", err);
+      }
     }
-  }
 
-  if (ticker) {
-    fetchBetaAndRisk();
-  }
+    if (ticker) {
+      fetchBetaAndRisk();
+    }
   }, [ticker]);
 
+  useEffect(() => {
+    async function fetchTickerInWatchlist() {
+      if (!auth.token) {
+        return;
+      }
+      const resp = await fetch(`${baseUrl}/watchlist/${ticker}`,
+        { headers: { 'Authorization': `Bearer ${auth.token}` } }
+      )
+      if (!resp.ok) {
+        const data = await resp.json();
+        console.log(data);
+        console.error("Failed to fetch user watchlist");
+        return;
+      }
+      const { in: inWatchlist } = await resp.json();
+      setInWatchlist(inWatchlist);
+    }
+    fetchTickerInWatchlist();
+  }, [auth.token])
+
+  const addTickerToWatchlist = async () => {
+    if (!auth.token) {
+      return;
+    }
+    const resp = await fetch(`${baseUrl}/watchlist/add`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${auth.token}`
+      },
+      body: JSON.stringify({ ticker: ticker })
+    })
+
+    if (!resp.ok) {
+      console.error(`Failed to add ${ticker} to watchlist`);
+      return;
+    }
+    setInWatchlist(true);
+  };
+
+  const removeTickerFromWatchlist = async () => {
+    if (!auth.token) {
+      return;
+    }
+    const resp = await fetch(`${baseUrl}/watchlist/remove`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${auth.token}`
+      },
+      body: JSON.stringify({ ticker: ticker })
+    })
+
+    if (!resp.ok) {
+      console.error(`Failed to remove ${ticker} from watchlist`);
+      return;
+    }
+    setInWatchlist(false);
+  }
 
   const selectedSegment = segments.find((seg) => seg.id === selectedSegmentId);
 
@@ -154,6 +209,11 @@ export default function ChartDisplay() {
     <div style={{ display: 'flex', height: '100vh', fontFamily: 'Arial, sans-serif' }}>
       <div style={{ flex: 3, padding: 20 }}>
         <h2>{ticker ? `${stockName} (${ticker.toUpperCase()})` : 'Loading...'}</h2>
+        {!auth.loading && (inWatchlist !== null) && (inWatchlist? (
+          <button onClick={removeTickerFromWatchlist}>Remove from watchlist</button>
+        ) : (
+          <button onClick={addTickerToWatchlist}>Add to watchlist</button>
+        ))}
         {beta !== null && (
           <p style={{ fontSize: '1rem', color: '#444' }}>
             <strong>Beta:</strong> {beta.toFixed(2)}<br />

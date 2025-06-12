@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import CommentSection from './CommentSection';
 import axios from 'axios';
 
