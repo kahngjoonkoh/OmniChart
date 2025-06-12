@@ -225,21 +225,21 @@ export default function ChartDisplay() {
           <p style={{ fontSize: '1rem', color: '#444', lineHeight: '1.6' }}>
             <strong>
               Beta
-              {/* <InfoTooltip text="Beta measures a stock's volatility compared to the market" /> */}
+              <InfoTooltip text="Beta measures a stock's volatility compared to the market" />
               :
             </strong>{' '}
             {beta.toFixed(2)}<br />
 
             <strong>
               Risk Classification
-              {/* <InfoTooltip text={`This classification is derived from the beta value:
+              <InfoTooltip text={`This classification is derived from the beta value:
 
 < 0: Inverse Market Risk
 0: No Market Risk
 0–1: Low Risk
 1: Average Risk
 1–2: High Risk
-> 2: Very High Risk`} /> */}
+> 2: Very High Risk`} />
               :
             </strong>{' '}
             {riskCategory}

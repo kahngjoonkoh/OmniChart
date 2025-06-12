@@ -53,7 +53,7 @@ const Header = ({ initialQuery = "" }) => {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            onFocus={() => setShowDropdown(false)} // temporarily disabled.
+            onFocus={() => setShowDropdown(true)}
             onBlur={() => setTimeout(() => setShowDropdown(false), 100)} // small delay so click registers
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             ref={inputRef}
