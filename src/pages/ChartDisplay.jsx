@@ -7,6 +7,7 @@ import SegmentHighlighter from '../components/SegmentHighlight';
 import NewsPanel from '../components/NewsPanel';
 import { data, useParams } from 'react-router-dom';
 import axios from 'axios';
+import InfoTooltip from '../components/InfoTooltip';
 
 import { useAuth } from '../context/AuthContext';
 
@@ -222,30 +223,27 @@ export default function ChartDisplay() {
         ))}
         {beta !== null && (
           <p style={{ fontSize: '1rem', color: '#444', lineHeight: '1.6' }}>
-    <strong>
-      Beta
-      <span
-        title="Beta measures a stock's volatility compared to the market"
-        style={{ cursor: 'help', marginLeft: 4 }}
-      >
-        ℹ️
-      </span>
-      :
-    </strong>{' '}
-    {beta.toFixed(2)}<br />
+            <strong>
+              Beta
+              {/* <InfoTooltip text="Beta measures a stock's volatility compared to the market" /> */}
+              :
+            </strong>{' '}
+            {beta.toFixed(2)}<br />
 
-    <strong>
-      Risk Classification
-      <span
-        title="This classification is derived from the beta value: n < 0: Inverse Market Risk | 0: No Market Risk | 0–1: Low Risk | 1: Average Risk | 1–2: High Risk | n > 2: Very High Risk"
-        style={{ cursor: 'help', marginLeft: 4 }}
-      >
-        ℹ️
-      </span>
-      :
-    </strong>{' '}
-    {riskCategory}
-  </p>
+            <strong>
+              Risk Classification
+              {/* <InfoTooltip text={`This classification is derived from the beta value:
+
+< 0: Inverse Market Risk
+0: No Market Risk
+0–1: Low Risk
+1: Average Risk
+1–2: High Risk
+> 2: Very High Risk`} /> */}
+              :
+            </strong>{' '}
+            {riskCategory}
+          </p>
         )}
         <ResponsiveContainer width="100%" height={400}>
           <LineChart data={stockData}>

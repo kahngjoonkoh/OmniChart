@@ -1,23 +1,40 @@
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, supabase } from '../context/AuthContext';
-import { MagnifyingGlassIcon } from '@heroicons/react/24/solid'; // Make sure heroicons is installed
-import { useState } from 'react';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { addRecentStockQuery, getRecentStockQueries } from '../utils/RecentStocks';
 
 const Header = ({ initialQuery = "" }) => {
   const navigate = useNavigate();
   const auth = useAuth();
   const [query, setQuery] = useState(initialQuery);
+  const [recentQueries, setRecentQueries] = useState([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const inputRef = useRef();
+
+  useEffect(() => {
+    setRecentQueries(getRecentStockQueries());
+  }, []);
 
   const handleSearch = () => {
-    if (query.trim() !== "") {
-      navigate(`/search?q=${encodeURIComponent(query.trim())}`);
+    const trimmed = query.trim();
+    if (trimmed !== "") {
+      addRecentStockQuery(trimmed);
+      navigate(`/search?q=${encodeURIComponent(trimmed)}`);
+      setShowDropdown(false);
     }
+  };
+
+  const handleSelectRecent = (q) => {
+    setQuery(q);
+    navigate(`/search?q=${encodeURIComponent(q)}`);
+    setShowDropdown(false);
   };
 
   const logoutHandler = () => {
     supabase.auth.signOut();
     navigate('/');
-  }
+  };
 
   return (
     <header className="w-full bg-white shadow px-6 py-4 sticky top-0 z-50">
@@ -36,7 +53,10 @@ const Header = ({ initialQuery = "" }) => {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            onFocus={() => setShowDropdown(false)} // temporarily disabled.
+            onBlur={() => setTimeout(() => setShowDropdown(false), 100)} // small delay so click registers
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            ref={inputRef}
             placeholder="Search stocks (e.g. AAPL or Apple)"
             className="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
@@ -46,6 +66,21 @@ const Header = ({ initialQuery = "" }) => {
           >
             <MagnifyingGlassIcon className="h-5 w-5" />
           </button>
+
+          {/* Dropdown */}
+          {showDropdown && recentQueries.length > 0 && (
+            <ul className="absolute bg-white border border-gray-200 rounded-md shadow-md mt-1 w-full z-20">
+              {recentQueries.map((q, idx) => (
+                <li
+                  key={idx}
+                  onClick={() => handleSelectRecent(q)}
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                >
+                  {q}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
         {/* Auth Buttons */}
