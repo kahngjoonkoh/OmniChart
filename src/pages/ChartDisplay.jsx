@@ -18,6 +18,8 @@ const generateStockData = async (ticker) => {
     return []; // Return an empty array immediately
   }
   try {
+    console.log("Fetching Stock data")
+    console.log(ticker)
     const response = await fetch(`${baseUrl}/bars/${ticker}`);
     if (!response.ok) {
       throw new Error(`Failed to fetch stock data: ${response.status} ${response.statusText}`);
@@ -48,12 +50,15 @@ const generateStockData = async (ticker) => {
 
 export default function ChartDisplay() {
   const { ticker } = useParams();
+  console.log("Displaying Chart")
+  console.log(ticker)
   const [stockData, setStockData] = useState([]);
   const [stockName, setStockName] = useState([])
   const [segments, setSegments] = useState([]);
   const [selectedSegmentId, setSelectedSegmentId] = useState(null);
   const [inWatchlist, setInWatchlist] = useState(null);
   const auth = useAuth();
+  const [hoveredSegmentId, setHoveredSegmentId] = useState(null);
 
   // for getting beta/risk level
   const [beta, setBeta] = useState(null);
@@ -203,13 +208,14 @@ export default function ChartDisplay() {
     setInWatchlist(false);
   }
 
-  const selectedSegment = segments.find((seg) => seg.id === selectedSegmentId);
+  const activeSegmentId = selectedSegmentId ?? hoveredSegmentId;
+  const selectedSegment = segments.find((seg) => seg.id === activeSegmentId);
 
   return (
     <div style={{ display: 'flex', height: '100vh', fontFamily: 'Arial, sans-serif' }}>
       <div style={{ flex: 3, padding: 20 }}>
         <h2>{ticker ? `${stockName} (${ticker.toUpperCase()})` : 'Loading...'}</h2>
-        {!auth.loading && (inWatchlist !== null) && (inWatchlist? (
+        {!auth.loading && (inWatchlist !== null) && (inWatchlist ? (
           <button onClick={removeTickerFromWatchlist}>Remove from watchlist</button>
         ) : (
           <button onClick={addTickerToWatchlist}>Add to watchlist</button>
@@ -226,33 +232,19 @@ export default function ChartDisplay() {
             <XAxis dataKey="date" minTickGap={30} />
             <YAxis domain={['dataMin - 10', 'dataMax + 10']} />
             <Tooltip />
-            <Line type="monotone" dataKey="price" stroke="#007bff" dot={false} />
+            <Line type="monotone" dataKey="price" stroke="#007bff" strokeWidth={2} dot={false} />
             {segments.map((segment) =>
               SegmentHighlighter(
                 segment,
                 stockData,
                 selectedSegmentId === segment.id,
-                setSelectedSegmentId
+                setSelectedSegmentId,
+                hoveredSegmentId === segment.id,
+                setHoveredSegmentId
               )
             )}
           </LineChart>
         </ResponsiveContainer>
-
-        {/* Debug: show the raw segments returned from the API */}
-        {/* <div style={{ marginTop: 20, color: '#555' }}>
-          <h4>Debug: Fetched Segments Data</h4>
-          <pre
-            style={{
-              maxHeight: 200,
-              overflowY: 'auto',
-              backgroundColor: '#f0f0f0',
-              padding: 10,
-              borderRadius: 4,
-            }}
-          >
-            {JSON.stringify(segments, null, 2)}
-          </pre>
-        </div> */}
       </div>
 
       <NewsPanel {...selectedSegment} />

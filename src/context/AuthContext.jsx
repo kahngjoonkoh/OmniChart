@@ -17,12 +17,12 @@ export const AuthProvider = ({ children }) => {
   // the tokens are not lost when refreshing the tab
   useEffect(() => {
     // Initialize session on load
-    supabase.auth.getSession().then(({ data: { session }}) => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       try {
         const { access_token: token } = session;
         setToken(token);
-      } catch (err) {}
+      } catch (err) { }
       setLoading(false);
     })
 
@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }) => {
       try {
         const { access_token: token } = session;
         setToken(token);
-      } catch (err) {}
+      } catch (err) { }
       setLoading(false);
     });
 
