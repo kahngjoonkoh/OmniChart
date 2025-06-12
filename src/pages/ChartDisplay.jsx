@@ -221,10 +221,31 @@ export default function ChartDisplay() {
           <button onClick={addTickerToWatchlist}>Add to watchlist</button>
         ))}
         {beta !== null && (
-          <p style={{ fontSize: '1rem', color: '#444' }}>
-            <strong>Beta:</strong> {beta.toFixed(2)}<br />
-            <strong>Risk Classification:</strong> {riskCategory}
-          </p>
+          <p style={{ fontSize: '1rem', color: '#444', lineHeight: '1.6' }}>
+    <strong>
+      Beta
+      <span
+        title="Beta measures a stock's volatility compared to the market"
+        style={{ cursor: 'help', marginLeft: 4 }}
+      >
+        ℹ️
+      </span>
+      :
+    </strong>{' '}
+    {beta.toFixed(2)}<br />
+
+    <strong>
+      Risk Classification
+      <span
+        title="This classification is derived from the beta value: n < 0: Inverse Market Risk | 0: No Market Risk | 0–1: Low Risk | 1: Average Risk | 1–2: High Risk | n > 2: Very High Risk"
+        style={{ cursor: 'help', marginLeft: 4 }}
+      >
+        ℹ️
+      </span>
+      :
+    </strong>{' '}
+    {riskCategory}
+  </p>
         )}
         <ResponsiveContainer width="100%" height={400}>
           <LineChart data={stockData}>
