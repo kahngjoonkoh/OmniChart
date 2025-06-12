@@ -8,7 +8,7 @@ import NewsPanel from '../components/NewsPanel';
 import { data, useParams } from 'react-router-dom';
 import axios from 'axios';
 
-import { useAuth } from '../context/AuthContext';
+import { getAccessToken } from '../client/Auth';
 
 const baseUrl = import.meta.env.VITE_API_URL;
 
@@ -53,7 +53,6 @@ export default function ChartDisplay() {
   const [segments, setSegments] = useState([]);
   const [selectedSegmentId, setSelectedSegmentId] = useState(null);
   const [inWatchlist, setInWatchlist] = useState(null);
-  const auth = useAuth();
 
   // for getting beta/risk level
   const [beta, setBeta] = useState(null);
@@ -146,12 +145,14 @@ export default function ChartDisplay() {
   }, [ticker]);
 
   useEffect(() => {
+    // Check whether current ticker is in user's watchlist
     async function fetchTickerInWatchlist() {
-      if (!auth.token) {
+      const token = await getAccessToken();
+      if (!token) {
         return;
       }
       const resp = await fetch(`${baseUrl}/watchlist/${ticker}`,
-        { headers: { 'Authorization': `Bearer ${auth.token}` } }
+        { headers: { 'Authorization': `Bearer ${token}` } }
       )
       if (!resp.ok) {
         const data = await resp.json();
@@ -163,16 +164,19 @@ export default function ChartDisplay() {
       setInWatchlist(inWatchlist);
     }
     fetchTickerInWatchlist();
-  }, [auth.token])
+  }, [])
 
+  // Add current ticker to watchlist
+  // It should be assumed that the ticker is not in watchlist before
   const addTickerToWatchlist = async () => {
-    if (!auth.token) {
+    const token = await getAccessToken();
+    if (!token) {
       return;
     }
     const resp = await fetch(`${baseUrl}/watchlist/add`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${auth.token}`
+        'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify({ ticker: ticker })
     })
@@ -184,14 +188,17 @@ export default function ChartDisplay() {
     setInWatchlist(true);
   };
 
+  // Remove current ticker from watchlist
+  // It should be assumed that the ticker is in watchlist before
   const removeTickerFromWatchlist = async () => {
-    if (!auth.token) {
+    const token = await getAccessToken();
+    if (!token) {
       return;
     }
     const resp = await fetch(`${baseUrl}/watchlist/remove`, {
       method: 'DELETE',
       headers: {
-        'Authorization': `Bearer ${auth.token}`
+        'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify({ ticker: ticker })
     })
@@ -209,7 +216,7 @@ export default function ChartDisplay() {
     <div style={{ display: 'flex', height: '100vh', fontFamily: 'Arial, sans-serif' }}>
       <div style={{ flex: 3, padding: 20 }}>
         <h2>{ticker ? `${stockName} (${ticker.toUpperCase()})` : 'Loading...'}</h2>
-        {!auth.loading && (inWatchlist !== null) && (inWatchlist? (
+        {inWatchlist !== null && (inWatchlist? (
           <button onClick={removeTickerFromWatchlist}>Remove from watchlist</button>
         ) : (
           <button onClick={addTickerToWatchlist}>Add to watchlist</button>

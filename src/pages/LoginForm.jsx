@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase, useAuth } from '../context/AuthContext';
+import { supabase, isLoggedIn } from '../client/Auth';
 
 function LoginForm() {
   const [username, setUsername] = useState('');
@@ -8,13 +8,14 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-  const auth = useAuth();
 
   useEffect(() => {
-    if (auth.isLoggedIn()) {
-      navigate('/');
-    }
-  }, [auth, navigate]);
+    isLoggedIn().then((state) => {
+      if (state) {
+        navigate('/');
+      }
+    });
+  }, [navigate]);
 
   // Log in the user given username and password
   const handleLogin = async (e) => {
@@ -49,6 +50,7 @@ function LoginForm() {
         }
         return;
       }
+      navigate('/');
     } finally {
       setLoading(false);
     }

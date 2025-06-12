@@ -1,12 +1,27 @@
 import { useNavigate } from 'react-router-dom';
-import { useAuth, supabase } from '../context/AuthContext';
+import { supabase, isLoggedIn } from '../client/Auth';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid'; // Make sure heroicons is installed
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const Header = ({ initialQuery = "" }) => {
   const navigate = useNavigate();
-  const auth = useAuth();
   const [query, setQuery] = useState(initialQuery);
+  const [loginStatus, setLoginStatus] = useState(null);
+
+  useEffect(() => {
+    // Retrieve login status
+    const updateLoginStatus = async () => {
+      const state = await isLoggedIn();
+      setLoginStatus(state);
+    };
+    updateLoginStatus();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      updateLoginStatus();
+    });
+    
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleSearch = () => {
     if (query.trim() !== "") {
@@ -15,8 +30,7 @@ const Header = ({ initialQuery = "" }) => {
   };
 
   const logoutHandler = () => {
-    supabase.auth.signOut();
-    navigate('/');
+    supabase.auth.signOut().then(() => navigate('/'));
   }
 
   return (
@@ -50,7 +64,7 @@ const Header = ({ initialQuery = "" }) => {
 
         {/* Auth Buttons */}
         <div className="flex gap-2 ml-auto">
-          {!auth.loading && (auth.isLoggedIn() ? (
+          {loginStatus !== null && (loginStatus ? (
             <button
               onClick={logoutHandler}
               className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"

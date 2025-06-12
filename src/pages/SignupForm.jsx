@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth, supabase } from '../context/AuthContext';
+import { supabase, isLoggedIn } from '../client/Auth';
 
 function SignupForm() {
   const [username, setUsername] = useState('');
@@ -10,13 +10,14 @@ function SignupForm() {
   const [error, setError] = useState(null);
 
   const navigate = useNavigate();
-  const auth = useAuth();
 
   useEffect(() => {
-    if (auth.isLoggedIn()) {
-      navigate('/');
-    }
-  }, [auth, navigate]);
+    isLoggedIn().then((state) => {
+      if (state) {
+        navigate('/');
+      }
+    });
+  }, [navigate]);
 
   const handleSignup = async (e) => {
     e.preventDefault();
