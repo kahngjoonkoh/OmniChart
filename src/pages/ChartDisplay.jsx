@@ -134,7 +134,7 @@ export default function ChartDisplay() {
   useEffect(() => {
   async function fetchBetaAndRisk() {
     try {
-      const res = await axios.get(`http://localhost:8080/api/v1/beta/${ticker}`);
+      const res = await axios.get(`${baseUrl}/beta/${ticker}`);
       setBeta(res.data.beta);
       setRiskCategory(res.data.riskCategory);
     } catch (err) {
