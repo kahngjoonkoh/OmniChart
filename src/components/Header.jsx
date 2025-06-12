@@ -16,7 +16,6 @@ const Header = ({ initialQuery = "" }) => {
 
   const logoutHandler = () => {
     supabase.auth.signOut();
-    alert("You have successfully logged out");
     navigate('/');
   }
 
@@ -51,7 +50,7 @@ const Header = ({ initialQuery = "" }) => {
 
         {/* Auth Buttons */}
         <div className="flex gap-2 ml-auto">
-          {auth.isLoggedIn() ? (
+          {!auth.loading && (auth.isLoggedIn() ? (
             <button
               onClick={logoutHandler}
               className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
@@ -73,7 +72,7 @@ const Header = ({ initialQuery = "" }) => {
                 Log in
               </button>
             </>
-          )}
+          ))}
         </div>
       </div>
     </header>

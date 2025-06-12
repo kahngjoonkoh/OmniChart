@@ -8,10 +8,10 @@ export const supabase = createClient(
   { auth: { persistSession: true, autoRefreshToken: true } }
 )
 
-const baseUrl = import.meta.env.VITE_API_URL;
-
 export const AuthProvider = ({ children }) => {
   const [session, setSession] = useState(null);
+  const [token, setToken] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   // Retrieve user tokens from local storage if any, so that
   // the tokens are not lost when refreshing the tab
@@ -19,15 +19,25 @@ export const AuthProvider = ({ children }) => {
     // Initialize session on load
     supabase.auth.getSession().then(({ data: { session }}) => {
       setSession(session);
+      try {
+        const { access_token: token } = session;
+        setToken(token);
+      } catch (err) {}
+      setLoading(false);
     })
 
     // Update session when auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, sess) => {
       setSession(sess);
+      try {
+        const { access_token: token } = session;
+        setToken(token);
+      } catch (err) {}
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
-  }, [])
+  }, []);
 
   // A convenient function that returns user login status
   const isLoggedIn = () => {
@@ -36,7 +46,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ session, isLoggedIn }}
+      value={{ session, user: session?.user, loading, token, isLoggedIn }}
     >
       {children}
     </AuthContext.Provider>
