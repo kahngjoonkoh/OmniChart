@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase, isLoggedIn } from '../client/Auth';
 
+const baseUrl = import.meta.env.VITE_API_URL;
+
 function SignupForm() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -96,11 +98,10 @@ function SignupForm() {
           <button
             type="submit"
             disabled={loading}
-            className={`w-full py-2 px-4 text-white font-semibold rounded ${
-              loading
+            className={`w-full py-2 px-4 text-white font-semibold rounded ${loading
                 ? 'bg-blue-300 cursor-not-allowed'
                 : 'bg-blue-600 hover:bg-blue-700 transition'
-            }`}
+              }`}
           >
             {loading ? 'Signing up...' : 'Sign up'}
           </button>

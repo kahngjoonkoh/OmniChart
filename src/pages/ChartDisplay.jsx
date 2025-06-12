@@ -7,6 +7,7 @@ import SegmentHighlighter from '../components/SegmentHighlight';
 import NewsPanel from '../components/NewsPanel';
 import { data, useParams } from 'react-router-dom';
 import axios from 'axios';
+import InfoTooltip from '../components/InfoTooltip';
 
 import { getAccessToken } from '../client/Auth';
 
@@ -18,6 +19,8 @@ const generateStockData = async (ticker) => {
     return []; // Return an empty array immediately
   }
   try {
+    console.log("Fetching Stock data")
+    console.log(ticker)
     const response = await fetch(`${baseUrl}/bars/${ticker}`);
     if (!response.ok) {
       throw new Error(`Failed to fetch stock data: ${response.status} ${response.statusText}`);
@@ -48,11 +51,14 @@ const generateStockData = async (ticker) => {
 
 export default function ChartDisplay() {
   const { ticker } = useParams();
+  console.log("Displaying Chart")
+  console.log(ticker)
   const [stockData, setStockData] = useState([]);
   const [stockName, setStockName] = useState([])
   const [segments, setSegments] = useState([]);
   const [selectedSegmentId, setSelectedSegmentId] = useState(null);
   const [inWatchlist, setInWatchlist] = useState(null);
+  const [hoveredSegmentId, setHoveredSegmentId] = useState(null);
 
   // for getting beta/risk level
   const [beta, setBeta] = useState(null);
@@ -210,7 +216,8 @@ export default function ChartDisplay() {
     setInWatchlist(false);
   }
 
-  const selectedSegment = segments.find((seg) => seg.id === selectedSegmentId);
+  const activeSegmentId = selectedSegmentId ?? hoveredSegmentId;
+  const selectedSegment = segments.find((seg) => seg.id === activeSegmentId);
 
   return (
     <div style={{ display: 'flex', height: '100vh', fontFamily: 'Arial, sans-serif' }}>
@@ -222,9 +229,27 @@ export default function ChartDisplay() {
           <button onClick={addTickerToWatchlist}>Add to watchlist</button>
         ))}
         {beta !== null && (
-          <p style={{ fontSize: '1rem', color: '#444' }}>
-            <strong>Beta:</strong> {beta.toFixed(2)}<br />
-            <strong>Risk Classification:</strong> {riskCategory}
+          <p style={{ fontSize: '1rem', color: '#444', lineHeight: '1.6' }}>
+            <strong>
+              Beta
+              <InfoTooltip text="Beta measures a stock's volatility compared to the market" />
+              :
+            </strong>{' '}
+            {beta.toFixed(2)}<br />
+
+            <strong>
+              Risk Classification
+              <InfoTooltip text={`This classification is derived from the beta value:
+
+< 0: Inverse Market Risk
+0: No Market Risk
+0–1: Low Risk
+1: Average Risk
+1–2: High Risk
+> 2: Very High Risk`} />
+              :
+            </strong>{' '}
+            {riskCategory}
           </p>
         )}
         <ResponsiveContainer width="100%" height={400}>
@@ -233,33 +258,19 @@ export default function ChartDisplay() {
             <XAxis dataKey="date" minTickGap={30} />
             <YAxis domain={['dataMin - 10', 'dataMax + 10']} />
             <Tooltip />
-            <Line type="monotone" dataKey="price" stroke="#007bff" dot={false} />
+            <Line type="monotone" dataKey="price" stroke="#007bff" strokeWidth={2} dot={false} />
             {segments.map((segment) =>
               SegmentHighlighter(
                 segment,
                 stockData,
                 selectedSegmentId === segment.id,
-                setSelectedSegmentId
+                setSelectedSegmentId,
+                hoveredSegmentId === segment.id,
+                setHoveredSegmentId
               )
             )}
           </LineChart>
         </ResponsiveContainer>
-
-        {/* Debug: show the raw segments returned from the API */}
-        {/* <div style={{ marginTop: 20, color: '#555' }}>
-          <h4>Debug: Fetched Segments Data</h4>
-          <pre
-            style={{
-              maxHeight: 200,
-              overflowY: 'auto',
-              backgroundColor: '#f0f0f0',
-              padding: 10,
-              borderRadius: 4,
-            }}
-          >
-            {JSON.stringify(segments, null, 2)}
-          </pre>
-        </div> */}
       </div>
 
       <NewsPanel {...selectedSegment} />

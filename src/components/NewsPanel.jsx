@@ -4,7 +4,7 @@ import axios from 'axios';
 
 const baseUrl = import.meta.env.VITE_API_URL;
 
-function SplitNews({news}) {
+function SplitNews({ news }) {
   if (!news) {
     return null; // or a loading spinner
   }
@@ -56,9 +56,14 @@ function NewsPanel({ id, startIndex, endIndex, title, news, source_url }) {
 
   return (
     <div style={{ flex: 1, borderLeft: '1px solid #ccc', padding: 20, overflowY: 'auto' }}>
+      {!id && (
+        <div style={{ color: '#777', textAlign: 'center' }}>
+          📰 Click or hover a colored chart area to view its related news event.
+        </div>
+      )}
       <h2>{title}</h2>
       <SplitNews news={news} />
-      
+
       {source_url && (
         <div style={{ marginTop: 10 }}>
           <span style={{ fontWeight: 'bold' }}>Source: </span>
@@ -68,10 +73,12 @@ function NewsPanel({ id, startIndex, endIndex, title, news, source_url }) {
         </div>
       )}
 
-      <CommentSection
-        comments={comments}
-        onAdd={handleAddComment}
-      />
+      {id && (
+        <CommentSection
+          comments={comments}
+          onAdd={handleAddComment}
+        />
+      )}
     </div>
   );
 }
