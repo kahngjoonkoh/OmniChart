@@ -8,6 +8,12 @@ import NewsPanel from '../components/NewsPanel';
 import { data, useParams } from 'react-router-dom';
 import axios from 'axios';
 import InfoTooltip from '../components/InfoTooltip';
+import {
+  BookmarkIcon as BookmarkOutlineIcon,
+  BookmarkIcon as BookmarkSolidIcon
+} from '@heroicons/react/24/outline'; // Outline for + icon
+
+import { BookmarkIcon as BookmarkFilledIcon } from '@heroicons/react/24/solid';
 
 import { getAccessToken } from '../client/Auth';
 
@@ -222,31 +228,33 @@ export default function ChartDisplay() {
   return (
     <div style={{ display: 'flex', height: '100vh', fontFamily: 'Arial, sans-serif' }}>
       <div style={{ flex: 3, padding: 20 }}>
-        <h2>{ticker ? `${stockName} (${ticker.toUpperCase()})` : 'Loading...'}</h2>
-        {inWatchlist !== null && (inWatchlist? (
-          <button onClick={removeTickerFromWatchlist}>Remove from watchlist</button>
-        ) : (
-          <button onClick={addTickerToWatchlist}>Add to watchlist</button>
-        ))}
+        <h2 className="text-xl font-bold">{ticker ? `${stockName} (${ticker.toUpperCase()})` : 'Loading...'}
+          {inWatchlist !== null && (
+            inWatchlist ? (
+              <button onClick={removeTickerFromWatchlist} className="text-xl text-blue-600 hover:text-blue-800">
+                <BookmarkFilledIcon className="w-6 h-6 stroke-[2] mx-1 p-1 items-center rounded hover:bg-gray-100 transition" />
+              </button>
+            ) : (
+              <button onClick={addTickerToWatchlist} className="text-gray-400 hover:text-blue-600">
+                <BookmarkOutlineIcon className="w-6 h-6 stroke-[2] mx-1 p-1 items-center rounded hover:bg-gray-100 transition" />
+              </button>
+            )
+          )}
+        </h2>
         {beta !== null && (
           <p style={{ fontSize: '1rem', color: '#444', lineHeight: '1.6' }}>
             <strong>
-              Beta
-              <InfoTooltip text="Beta measures a stock's volatility compared to the market" />
-              :
-            </strong>{' '}
-            {beta.toFixed(2)}<br />
-
-            <strong>
               Risk Classification
-              <InfoTooltip text={`This classification is derived from the beta value:
+              <InfoTooltip text={`This classification is derived from the beta value (${beta.toFixed(2)}):
 
 < 0: Inverse Market Risk
 0: No Market Risk
 0–1: Low Risk
 1: Average Risk
 1–2: High Risk
-> 2: Very High Risk`} />
+> 2: Very High Risk
+
+Beta measures a stock's volatility compared to the market`} />
               :
             </strong>{' '}
             {riskCategory}
