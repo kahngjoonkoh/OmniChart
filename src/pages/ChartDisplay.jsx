@@ -1,5 +1,5 @@
 // below is version that uses database:
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Brush
 } from 'recharts';
@@ -192,6 +192,22 @@ export default function ChartDisplay() {
     fetchTickerInWatchlist();
   }, [])
 
+  useEffect(() => {
+    const preventZoom = (e) => {
+      if (
+        (e.ctrlKey || e.metaKey) && (e.deltaY !== 0 || e.deltaX !== 0)
+      ) {
+        e.preventDefault();
+      }
+    };
+
+    window.addEventListener('wheel', preventZoom, { passive: false });
+
+    return () => {
+      window.removeEventListener('wheel', preventZoom);
+    };
+  }, []);
+
   // Add current ticker to watchlist
   // It should be assumed that the ticker is not in watchlist before
   const addTickerToWatchlist = async () => {
@@ -238,6 +254,54 @@ export default function ChartDisplay() {
 
   const activeSegmentId = selectedSegmentId ?? hoveredSegmentId;
   const selectedSegment = segments.find((seg) => seg.id === activeSegmentId);
+
+  // inside your component (ChartDisplay)
+  const chartRef = useRef(null);
+  const isDragging = useRef(false);
+  const dragStartX = useRef(null);
+
+  const handleZoom = (e) => {
+    e.preventDefault();
+    const zoomFactor = 1.2;
+    const direction = e.deltaY > 0 ? 1 : -1;
+
+    const diff = endDate - startDate;
+    const newDiff = direction > 0 ? diff * zoomFactor : diff / zoomFactor;
+
+    const center = new Date((startDate.getTime() + endDate.getTime()) / 2);
+    const newStart = new Date(center.getTime() - newDiff / 2);
+    const newEnd = new Date(center.getTime() + newDiff / 2);
+
+    setStartDate(newStart);
+    setEndDate(newEnd);
+  };
+
+  const handleMouseDown = (e) => {
+    isDragging.current = true;
+    dragStartX.current = e.clientX;
+  };
+
+  const handleMouseUp = () => {
+    isDragging.current = false;
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging.current || !stockData.length) return;
+
+    const deltaX = e.clientX - dragStartX.current;
+    dragStartX.current = e.clientX;
+
+    const chartWidth = chartRef.current?.offsetWidth || 800; // fallback
+    const timePerPixel = (endDate - startDate) / chartWidth;
+
+    const deltaTime = -deltaX * timePerPixel;
+
+    const newStart = new Date(startDate.getTime() + deltaTime);
+    const newEnd = new Date(endDate.getTime() + deltaTime);
+
+    setStartDate(newStart);
+    setEndDate(newEnd);
+  };
 
   return (
     <div style={{ display: 'flex', height: '100vh', fontFamily: 'Arial, sans-serif' }}>
@@ -309,26 +373,35 @@ Beta measures a stock's volatility compared to the market`} />
             <option value="60">5 Years</option>
           </select>
         </div>
-        <ResponsiveContainer width="100%" height={400}>
-          <LineChart data={stockData}>
-            <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
-            <XAxis dataKey="date" minTickGap={30} />
-            <YAxis domain={['dataMin - 10', 'dataMax + 10']} />
-            <Tooltip />
-            <Line type="monotone" dataKey="price" stroke="#007bff" strokeWidth={2} dot={false} />
-            {segments.map((segment) =>
-              SegmentHighlighter(
-                segment,
-                stockData,
-                selectedSegmentId === segment.id,
-                setSelectedSegmentId,
-                hoveredSegmentId === segment.id,
-                setHoveredSegmentId
-              )
-            )}
-            <Brush dataKey="date" height={30} stroke="#8884d8" />
-          </LineChart>
-        </ResponsiveContainer>
+          <div
+            ref={chartRef}
+            onWheel={handleZoom}
+            onMouseDown={handleMouseDown}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+            onMouseMove={handleMouseMove}
+            style={{ cursor: isDragging.current ? 'grabbing' : 'grab' }}
+          >
+            <ResponsiveContainer width="100%" height={400}>
+              <LineChart data={stockData}>
+                <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
+                <XAxis dataKey="date" minTickGap={30} />
+                <YAxis domain={['dataMin - 10', 'dataMax + 10']} />
+                <Tooltip />
+                <Line type="monotone" dataKey="price" stroke="#007bff" strokeWidth={2} dot={false} />
+                {segments.map((segment) =>
+                  SegmentHighlighter(
+                    segment,
+                    stockData,
+                    selectedSegmentId === segment.id,
+                    setSelectedSegmentId,
+                    hoveredSegmentId === segment.id,
+                    setHoveredSegmentId
+                  )
+                )}
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
       </div>
 
       <NewsPanel {...selectedSegment} />
