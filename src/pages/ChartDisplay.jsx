@@ -1,7 +1,7 @@
 // below is version that uses database:
 import { useState, useEffect } from 'react';
 import {
-  LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer
+  LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Brush
 } from 'recharts';
 import SegmentHighlighter from '../components/SegmentHighlight';
 import NewsPanel from '../components/NewsPanel';
@@ -19,39 +19,42 @@ import { getAccessToken } from '../client/Auth';
 
 const baseUrl = import.meta.env.VITE_API_URL;
 
-const generateStockData = async (ticker) => {
+const toISOStringDateOnly = (date) => {
+  const d = new Date(date);
+  d.setUTCHours(0, 0, 0, 0);
+  const iso = d.toISOString(); // e.g. 2020-06-13T00:00:00.000Z
+  return iso.replace('.000Z', 'Z'); // returns 2020-06-13T00:00:00Z
+};
+
+const generateStockData = async (ticker, startDate, endDate) => {
   if (!ticker) {
-    console.error("Error: Ticker symbol is undefined or empty. Cannot fetch stock data.");
-    return []; // Return an empty array immediately
+    console.error("Error: Ticker symbol is undefined or empty.");
+    return [];
   }
+
   try {
-    console.log("Fetching Stock data")
-    console.log(ticker)
-    const response = await fetch(`${baseUrl}/bars/${ticker}`);
+    const queryParams = new URLSearchParams({
+      start: toISOStringDateOnly(startDate),
+      end: toISOStringDateOnly(endDate)
+    });
+
+    const url = `${baseUrl}/bars/${ticker}?${queryParams}`;
+    console.log(url);
+
+    const response = await fetch(url);
     if (!response.ok) {
-      throw new Error(`Failed to fetch stock data: ${response.status} ${response.statusText}`);
+      throw new Error(`Failed to fetch stock data: ${response.status}`);
     }
+
     const apiData = await response.json();
 
-    const formattedData = apiData.map(bar => ({
+    return apiData.map(bar => ({
       date: new Date(bar.t).toISOString().slice(0, 10),
       price: parseFloat(bar.c.toFixed(2)),
     }));
-    console.log(formattedData)
-    // // Format the fetched data for Lightweight Charts Candlestick Series
-    // // Expected format: { time: Unix timestamp in seconds, open: ..., high: ..., low: ..., close: ... }
-    // const formattedData = apiData.map(bar => ({
-    //   time: new Date(bar.t).getTime() / 1000, // Convert ISO string ('t') to Unix timestamp (seconds)
-    //   open: parseFloat(bar.o),   // 'o' for open
-    //   high: parseFloat(bar.h),   // 'h' for high
-    //   low: parseFloat(bar.l),     // 'l' for low
-    //   close: parseFloat(bar.c), // 'c' for close
-    // }));
-
-    return formattedData;
   } catch (error) {
     console.error('Error in generateStockData:', error);
-    return []; // Return an empty array on error to prevent chart issues
+    return [];
   }
 };
 
@@ -70,17 +73,28 @@ export default function ChartDisplay() {
   const [beta, setBeta] = useState(null);
   const [riskCategory, setRiskCategory] = useState('');
 
-  useEffect(() => {
-    async function fetchStockData() {
-      console.log("Fetching stock data for ticker:", ticker);
-      const data = await generateStockData(ticker);
-      setStockData(data);
-    }
+  const [startDate, setStartDate] = useState(() => {
+    const date = new Date();
+    date.setMonth(date.getMonth() - 3);
+    return date;
+  });
+  const [endDate, setEndDate] = useState(new Date());
 
-    if (ticker) { // Only fetch if ticker is available
-      fetchStockData();
+  useEffect(() => {
+    console.log("Fetching stock data for range:", {
+    ticker,
+    start: startDate.toISOString(),
+    end: endDate.toISOString()
+    });
+
+    async function fetchStockData() {
+      if (ticker && startDate && endDate) {
+        const data = await generateStockData(ticker, startDate, endDate);
+        setStockData(data);
+      }
     }
-  }, [ticker]);
+    fetchStockData();
+  }, [ticker, startDate, endDate]);
 
   useEffect(() => {
     async function fetchStockName() {
@@ -260,6 +274,41 @@ Beta measures a stock's volatility compared to the market`} />
             {riskCategory}
           </p>
         )}
+        <div className="flex items-center gap-4 mt-4 mb-2">
+          <label htmlFor="range-select" className="text-sm text-gray-600 font-medium">
+            View Range:
+          </label>
+          <select
+            id="range-select"
+            className="border border-gray-300 rounded-md px-3 py-1 text-sm shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            onChange={(e) => {
+              const value = e.target.value;
+              const now = new Date();         // Create a single consistent "now"
+              const newStart = new Date(now); // Clone it
+
+              if (value.endsWith('Y')) {
+                const years = parseInt(value);
+                newStart.setFullYear(now.getFullYear() - years);
+              } else {
+                const months = parseInt(value);
+                newStart.setMonth(now.getMonth() - months);
+              }
+
+              setStartDate(newStart);
+              setEndDate(now); // Use same `now` instead of new Date()
+            }}
+            defaultValue="3"
+          >
+            <option value="1">1 Month</option>
+            <option value="3">3 Months</option>
+            <option value="6">6 Months</option>
+            <option value="12">1 Year</option>
+            <option value="24">2 Years</option>
+            <option value="36">3 Years</option>
+            <option value="48">4 Years</option>
+            <option value="60">5 Years</option>
+          </select>
+        </div>
         <ResponsiveContainer width="100%" height={400}>
           <LineChart data={stockData}>
             <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
@@ -277,6 +326,7 @@ Beta measures a stock's volatility compared to the market`} />
                 setHoveredSegmentId
               )
             )}
+            <Brush dataKey="date" height={30} stroke="#8884d8" />
           </LineChart>
         </ResponsiveContainer>
       </div>
