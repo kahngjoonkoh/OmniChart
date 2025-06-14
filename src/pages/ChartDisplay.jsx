@@ -191,10 +191,17 @@ export default function ChartDisplay() {
     const direction = e.deltaY > 0 ? 1 : -1;
     const diff = endDate - startDate;
     const newDiff = direction > 0 ? diff * zoomFactor : diff / zoomFactor;
+
     const center = new Date((startDate.getTime() + endDate.getTime()) / 2);
     let newStart = new Date(center.getTime() - newDiff / 2);
     let newEnd = new Date(center.getTime() + newDiff / 2);
 
+    const minZoomDuration = 1000 * 60 * 60 * 24 * 3; // 3 days in milliseconds
+
+    // Prevent zooming in too much
+    if (newEnd - newStart < minZoomDuration) return;
+
+    // Prevent zooming out beyond fetched data
     if (minFetchedDate && newStart < minFetchedDate) newStart = minFetchedDate;
     if (maxFetchedDate && newEnd > maxFetchedDate) newEnd = maxFetchedDate;
 
