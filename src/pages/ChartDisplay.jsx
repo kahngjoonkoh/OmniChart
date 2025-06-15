@@ -170,15 +170,29 @@ export default function ChartDisplay() {
     fetchTickerInWatchlist();
   }, []);
 
+  // useEffect(() => {
+  //   const preventZoom = (e) => {
+  //     if ((e.ctrlKey || e.metaKey) && (e.deltaY !== 0 || e.deltaX !== 0)) {
+  //       e.preventDefault();
+  //     }
+  //   };
+  //   window.addEventListener('wheel', preventZoom, { passive: false });
+  //   return () => window.removeEventListener('wheel', preventZoom);
+  // }, []);
   useEffect(() => {
-    const preventZoom = (e) => {
-      if ((e.ctrlKey || e.metaKey) && (e.deltaY !== 0 || e.deltaX !== 0)) {
-        e.preventDefault();
-      }
+    const chart = chartRef.current;
+    if (!chart) return;
+
+    // Override passive wheel listener
+    const handleWheel = (e) => {
+      e.preventDefault(); // allow zoom
+      handleZoom(e);
     };
-    window.addEventListener('wheel', preventZoom, { passive: false });
-    return () => window.removeEventListener('wheel', preventZoom);
-  }, []);
+
+    chart.addEventListener('wheel', handleWheel, { passive: false });
+    return () => chart.removeEventListener('wheel', handleWheel);
+  }, [startDate, endDate]);
+
 
   const addTickerToWatchlist = async () => {
     const token = await getAccessToken();
@@ -322,7 +336,10 @@ Beta measures a stock's volatility compared to the market`} />:</strong> {riskCa
         </div>
         <div
           ref={chartRef}
-          onWheel={handleZoom}
+          onWheel={(e) => {
+            e.preventDefault();
+            handleZoom(e);
+          }}
           onMouseDown={handleMouseDown}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
@@ -333,9 +350,13 @@ Beta measures a stock's volatility compared to the market`} />:</strong> {riskCa
             <LineChart data={visibleStockData}>
               <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
               <XAxis dataKey="date" minTickGap={30} />
-              <YAxis domain={['dataMin - 10', 'dataMax + 10']} />
+              <YAxis
+                type="number"
+                domain={([dataMin, dataMax]) => [Math.max(dataMin - 10, 0), dataMax + 10]}
+                tickCount={5} tickFormatter={(value) => value.toFixed(2)}
+              />
               <Tooltip />
-              <Line type="monotone" dataKey="price" stroke="#007bff" strokeWidth={2} dot={false} />
+              <Line type="monotone" dataKey="price" stroke="#007bff" strokeWidth={2} dot={false} isAnimationActive={false} />
               {segments.map(segment =>
                 SegmentHighlighter(segment, visibleStockData, selectedSegmentId === segment.id, setSelectedSegmentId, hoveredSegmentId === segment.id, setHoveredSegmentId)
               )}
