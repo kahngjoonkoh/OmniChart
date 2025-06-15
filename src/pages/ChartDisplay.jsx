@@ -116,6 +116,7 @@ export default function ChartDisplay() {
         const enrichedSegments = await Promise.all(events.map(async (event) => {
           return {
             id: event.id,
+            timestamp: event.events.timestamp,
             startIndex: event.start_index,
             endIndex: event.end_index,
             title: event.events.title,
@@ -190,10 +191,17 @@ export default function ChartDisplay() {
     const direction = e.deltaY > 0 ? 1 : -1;
     const diff = endDate - startDate;
     const newDiff = direction > 0 ? diff * zoomFactor : diff / zoomFactor;
+
     const center = new Date((startDate.getTime() + endDate.getTime()) / 2);
     let newStart = new Date(center.getTime() - newDiff / 2);
     let newEnd = new Date(center.getTime() + newDiff / 2);
 
+    const minZoomDuration = 1000 * 60 * 60 * 24 * 3; // 3 days in milliseconds
+
+    // Prevent zooming in too much
+    if (newEnd - newStart < minZoomDuration) return;
+
+    // Prevent zooming out beyond fetched data
     if (minFetchedDate && newStart < minFetchedDate) newStart = minFetchedDate;
     if (maxFetchedDate && newEnd > maxFetchedDate) newEnd = maxFetchedDate;
 
@@ -202,24 +210,31 @@ export default function ChartDisplay() {
   };
 
   const handleMouseDown = (e) => {
+    e.preventDefault();
     isDragging.current = true;
     dragStartX.current = e.clientX;
   };
 
-  const handleMouseUp = () => {
+  const handleMouseUp = (e) => {
     isDragging.current = false;
   };
 
   const handleMouseMove = (e) => {
     if (!isDragging.current) return;
+
+    e.preventDefault();
+
     const deltaX = e.clientX - dragStartX.current;
     dragStartX.current = e.clientX;
+
     const chartWidth = chartRef.current?.offsetWidth || 800;
-    const timePerPixel = (endDate - startDate) / chartWidth;
+    const timePerPixel = (endDate.getTime() - startDate.getTime()) / chartWidth;
     const deltaTime = -deltaX * timePerPixel;
+
     let newStart = new Date(startDate.getTime() + deltaTime);
     let newEnd = new Date(endDate.getTime() + deltaTime);
 
+    // Clamp to fetched data range
     if (minFetchedDate && newStart < minFetchedDate) {
       const offset = minFetchedDate.getTime() - newStart.getTime();
       newStart = new Date(newStart.getTime() + offset);
