@@ -153,6 +153,24 @@ export default function ChartDisplay() {
   }, [ticker]);
 
   useEffect(() => {
+    async function fetchTickerInWatchlist() {
+      const token = await getAccessToken();
+      const resp = await fetch(`${baseUrl}/watchlist/${ticker}`,
+        { headers: { 'Authorization': `Bearer ${token}` } }
+      )
+      if (!resp.ok) {
+        const data = await resp.json();
+        console.log(data);
+        console.error("Failed to fetch user watchlist");
+        return;
+      }
+      const { in: inWatchlist } = await resp.json();
+      setInWatchlist(inWatchlist);
+    }
+    fetchTickerInWatchlist();
+  }, []);
+
+  useEffect(() => {
     const preventZoom = (e) => {
       if ((e.ctrlKey || e.metaKey) && (e.deltaY !== 0 || e.deltaX !== 0)) {
         e.preventDefault();
