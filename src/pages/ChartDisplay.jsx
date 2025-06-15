@@ -278,17 +278,26 @@ export default function ChartDisplay() {
           {inWatchlist !== null && (
             inWatchlist ? (
               <button onClick={removeTickerFromWatchlist}>
-                <BookmarkFilledIcon className="w-6 h-6" />
+                <BookmarkFilledIcon className="w-6 h-6 stroke-[2] text-blue-600 mx-1 p-1 items-center rounded hover:bg-gray-100 transition" />
               </button>
             ) : (
               <button onClick={addTickerToWatchlist}>
-                <BookmarkOutlineIcon className="w-6 h-6" />
+                <BookmarkOutlineIcon className="w-6 h-6 stroke-[2] text-blue-600 mx-1 p-1 items-center rounded hover:bg-gray-100 transition" />
               </button>
             )
           )}
         </h2>
         {beta !== null && (
-          <p><strong>Risk Classification<InfoTooltip text={`This classification is derived from the beta value (${beta.toFixed(2)}):\n...`} />:</strong> {riskCategory}</p>
+          <p><strong>Risk Classification<InfoTooltip text={`This classification is derived from the beta value (${beta.toFixed(2)}):
+
+< 0: Inverse Market Risk
+0: No Market Risk
+0–1: Low Risk
+1: Average Risk
+1–2: High Risk
+> 2: Very High Risk
+
+Beta measures a stock's volatility compared to the market`} />:</strong> {riskCategory}</p>
         )}
         <div className="flex items-center gap-4 mt-4 mb-2">
           <label htmlFor="range-select">View Range:</label>
