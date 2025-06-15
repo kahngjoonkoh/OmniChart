@@ -17,3 +17,9 @@ export const isLoggedIn = async () => {
   const { data: { session } } = await supabase.auth.getSession();
   return session != null;
 }
+
+// Set the login status
+export const updateLoginStatus = async (setLoginStatus) => {
+  const status = await isLoggedIn();
+  setLoginStatus(status);
+}

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase, isLoggedIn } from '../client/Auth';
+import { supabase, isLoggedIn, updateLoginStatus } from '../client/Auth';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import { addRecentStockQuery, getRecentStockQueries } from '../utils/RecentStocks';
 
@@ -13,15 +13,10 @@ const Header = ({ initialQuery = "" }) => {
   const inputRef = useRef();
 
   useEffect(() => {
-    // Retrieve login status
-    const updateLoginStatus = async () => {
-      const state = await isLoggedIn();
-      setLoginStatus(state);
-    };
-    updateLoginStatus();
+    updateLoginStatus(setLoginStatus);
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      updateLoginStatus();
+      updateLoginStatus(setLoginStatus);
     });
     
     return () => subscription.unsubscribe();

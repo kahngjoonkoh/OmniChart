@@ -1,8 +1,4 @@
-import { useEffect, useState } from 'react';
 import CommentSection from './CommentSection';
-import axios from 'axios';
-
-const baseUrl = import.meta.env.VITE_API_URL;
 
 function SplitNews({ news }) {
   if (!news) {
@@ -25,35 +21,6 @@ function SplitNews({ news }) {
 }
 
 function NewsPanel({ id, startIndex, endIndex, title, news, source_url }) {
-  const [comments, setComments] = useState([]);
-
-  useEffect(() => {
-    async function fetchComments() {
-      try {
-        const res = await axios.get(`${baseUrl}/comments/${id}`);
-        setComments(res.data);
-      } catch (err) {
-        console.error('Failed to fetch comments:', err);
-      }
-    }
-
-    fetchComments();
-  }, [id]);
-
-  const handleAddComment = async (text) => {
-    try {
-      const res = await axios.post(`${baseUrl}/comments`, {
-        content: text,
-        ticker_event_id: id,
-        user_id: '743eea30-f699-4734-9cc1-3cedd832ba69', // Replace with actual user ID in real app
-      });
-
-      setComments((prev) => [...prev, res.data]);
-    } catch (err) {
-      console.error('Failed to post comment:', err);
-    }
-  };
-
   return (
     <div style={{ flex: 1, borderLeft: '1px solid #ccc', padding: 20, overflowY: 'auto' }}>
       {!id && (
@@ -102,10 +69,7 @@ function NewsPanel({ id, startIndex, endIndex, title, news, source_url }) {
 
 
       {id && (
-        <CommentSection
-          comments={comments}
-          onAdd={handleAddComment}
-        />
+        <CommentSection id={id}/>
       )}
     </div>
   );

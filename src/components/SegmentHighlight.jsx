@@ -3,9 +3,6 @@ import React from 'react';
 import { ReferenceArea } from 'recharts';
 
 function SegmentHighlighter(segment, data, isSelected, onClick, isHovered, onHover) {
-  console.log("Segment Highlighted");
-  console.log(segment.id);
-
   const startObj = data[segment.startIndex];
   const endObj = data[segment.endIndex];
 

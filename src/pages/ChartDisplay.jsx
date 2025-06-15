@@ -186,7 +186,6 @@ export default function ChartDisplay() {
   };
 
   const handleZoom = (e) => {
-    e.preventDefault();
     const zoomFactor = 1.2;
     const direction = e.deltaY > 0 ? 1 : -1;
     const diff = endDate - startDate;
