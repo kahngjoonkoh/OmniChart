@@ -181,7 +181,6 @@ export default function ChartDisplay() {
     async function fetchTickerInWatchlist() {
       const token = await getAccessToken();
       if (!token) {
-        navigate('/login');
         return;
       }
       let resp;
