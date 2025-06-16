@@ -68,7 +68,10 @@ export default function ChartDisplay() {
     now.setMonth(now.getMonth() - 3);
     return now;
   });
-  const [endDate, setEndDate] = useState(new Date());
+
+  // subtracting 15.05m to prevent {"details":"subscription does not permit querying recent SIP data (HTTP 403)","error":"Error fetching historical bars"}
+  const [endDate, setEndDate] = useState(new Date(Date.now() - 15.05 * 60 * 1000)); 
+
 
   const [minFetchedDate, setMinFetchedDate] = useState(null);
   const [maxFetchedDate, setMaxFetchedDate] = useState(null);
