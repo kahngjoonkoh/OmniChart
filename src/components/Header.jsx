@@ -18,10 +18,10 @@ const Header = ({ initialQuery = "" }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
       updateLoginStatus(setLoginStatus);
     });
-    
+
     return () => subscription.unsubscribe();
   }, []);
-  
+
 
   useEffect(() => {
     setRecentQueries(getRecentStockQueries());
@@ -83,7 +83,7 @@ const Header = ({ initialQuery = "" }) => {
               {recentQueries.map((q, idx) => (
                 <li
                   key={idx}
-                  onClick={() => handleSelectRecent(q)}
+                  onMouseDown={() => handleSelectRecent(q)}
                   className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                 >
                   {q}
