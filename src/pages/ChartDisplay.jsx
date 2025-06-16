@@ -4,7 +4,7 @@ import {
 } from 'recharts';
 import SegmentHighlighter from '../components/SegmentHighlight';
 import NewsPanel from '../components/NewsPanel';
-import { useParams } from 'react-router-dom';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import InfoTooltip from '../components/InfoTooltip';
 import {
@@ -12,6 +12,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { BookmarkIcon as BookmarkFilledIcon } from '@heroicons/react/24/solid';
 import { getAccessToken } from '../client/Auth';
+import { useAlert } from '../components/AlertBox';
 
 const baseUrl = import.meta.env.VITE_API_URL;
 
@@ -24,7 +25,8 @@ const toISOStringDateOnly = (date) => {
 
 const generateStockData = async (ticker, startDate, endDate) => {
   if (!ticker) {
-    console.error("Error: Ticker symbol is undefined or empty.");
+    addAlert("Ticker symbol is undefined or empty");
+    // console.error("Error: Ticker symbol is undefined or empty.");
     return [];
   }
 
@@ -35,9 +37,17 @@ const generateStockData = async (ticker, startDate, endDate) => {
     });
 
     const url = `${baseUrl}/bars/${ticker}?${queryParams}`;
-    const response = await fetch(url);
+    let response;
+    try {
+      response = await fetch(url);
+    } catch (err) {
+      addAlert("Failed to fetch stock data", "error");
+      return [];
+    }
     if (!response.ok) {
-      throw new Error(`Failed to fetch stock data: ${response.status}`);
+      addAlert("Failed to fetch stock data", "error");
+      return [];
+      // throw new Error(`Failed to fetch stock data: ${response.status}`);
     }
 
     const apiData = await response.json();
@@ -47,7 +57,8 @@ const generateStockData = async (ticker, startDate, endDate) => {
       price: parseFloat(bar.c.toFixed(2)),
     }));
   } catch (error) {
-    console.error('Error in generateStockData:', error);
+    addAlert("Failed to generate stock data", "error");
+    // console.error('Error in generateStockData:', error);
     return [];
   }
 };
@@ -62,6 +73,8 @@ export default function ChartDisplay() {
   const [hoveredSegmentId, setHoveredSegmentId] = useState(null);
   const [beta, setBeta] = useState(null);
   const [riskCategory, setRiskCategory] = useState('');
+  const { addAlert } = useAlert();
+  const navigate = useNavigate();
 
   const [startDate, setStartDate] = useState(() => {
     const now = new Date();
@@ -103,9 +116,13 @@ export default function ChartDisplay() {
 
   useEffect(() => {
     async function fetchStockName() {
-      const res = await axios.get(`${baseUrl}/search?q=${ticker}`);
-      const data = res.data;
-      setStockName(data.stocks[0].name);
+      try {
+        const res = await axios.get(`${baseUrl}/search?q=${ticker}`);
+        const data = res.data;
+        setStockName(data.stocks[0].name);
+      } catch (err) {
+        addAlert("Failed to fetch stock name", "error");
+      }
     }
     if (ticker) {
       fetchStockName();
@@ -133,7 +150,9 @@ export default function ChartDisplay() {
           setSelectedSegmentId(enrichedSegments[0].id);
         }
       } catch (err) {
-        console.error("Error fetching ticker events", err);
+        addAlert("Failed to fetch ticker events", "error");
+        return;
+        // console.error("Error fetching ticker events", err);
       }
     }
     if (ticker) {
@@ -148,7 +167,9 @@ export default function ChartDisplay() {
         setBeta(res.data.beta);
         setRiskCategory(res.data.riskCategory);
       } catch (err) {
-        console.error("Failed to fetch beta and risk category", err);
+        addAlert("Failed to fetch beta and risk category", "error");
+        return;
+        // console.error("Failed to fetch beta and risk category", err);
       }
     }
     if (ticker) {
@@ -159,13 +180,22 @@ export default function ChartDisplay() {
   useEffect(() => {
     async function fetchTickerInWatchlist() {
       const token = await getAccessToken();
-      const resp = await fetch(`${baseUrl}/watchlist/${ticker}`,
-        { headers: { 'Authorization': `Bearer ${token}` } }
-      )
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+      let resp;
+      try {
+        resp = await fetch(`${baseUrl}/watchlist/${ticker}`,
+          { headers: { 'Authorization': `Bearer ${token}` } }
+        )
+      } catch (err) {
+        addAlert("Failed to fetch watchlist", "error");
+        return;
+      }
       if (!resp.ok) {
-        const data = await resp.json();
-        console.log(data);
-        console.error("Failed to fetch user watchlist");
+        addAlert("Failed to fetch watchlist", "error");
+        // console.error("Failed to fetch user watchlist");
         return;
       }
       const { in: inWatchlist } = await resp.json();
@@ -185,7 +215,10 @@ export default function ChartDisplay() {
   // }, []);
   useEffect(() => {
     const chart = chartRef.current;
-    if (!chart) return;
+    if (!chart) {
+      addAlert("Cannot fetch chart", "error");
+      return;
+    };
 
     // Override passive wheel listener
     const handleWheel = (e) => {
@@ -200,26 +233,52 @@ export default function ChartDisplay() {
 
   const addTickerToWatchlist = async () => {
     const token = await getAccessToken();
-    if (!token) return;
-    const resp = await fetch(`${baseUrl}/watchlist/add`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify({ ticker })
-    });
-    if (!resp.ok) return;
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+    let resp;
+    try {
+      resp = await fetch(`${baseUrl}/watchlist/add`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ ticker })
+      });
+    } catch (err) {
+      addAlert("Failed to add ticker to watchlist", "error");
+      return;
+    }
+    if (!resp.ok) {
+      addAlert("Failed to add ticker to watchlist", "error");
+      return;
+    };
     setInWatchlist(true);
+    addAlert("Successfully added to watchlist", "success");
   };
 
   const removeTickerFromWatchlist = async () => {
     const token = await getAccessToken();
-    if (!token) return;
-    const resp = await fetch(`${baseUrl}/watchlist/remove`, {
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify({ ticker })
-    });
-    if (!resp.ok) return;
+    if (!token) {
+      navigate('/login');
+      return;
+    };
+    let resp;
+    try {
+      resp = await fetch(`${baseUrl}/watchlist/remove`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ ticker })
+      });
+    } catch (err) {
+      addAlert("Failed to remove ticker from watchlist", "error");
+      return;
+    }
+    if (!resp.ok) {
+      addAlert("Failed to remove ticker from watchlist", "error");
+      return;
+    }
     setInWatchlist(false);
+    addAlert("Successfully removed from watchlist", "success");
   };
 
   const handleZoom = (e) => {

@@ -1,17 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase, isLoggedIn } from '../client/Auth';
-
-const baseUrl = import.meta.env.VITE_API_URL;
+import { useAlert } from '../components/AlertBox';
 
 function SignupForm() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
   const navigate = useNavigate();
+  const { addAlert } = useAlert();
 
   useEffect(() => {
     isLoggedIn().then((state) => {
@@ -24,26 +23,30 @@ function SignupForm() {
   const handleSignup = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
 
-    const { error } = await supabase.auth.signUp({
-      email: email,
-      password: password,
-      options: {
-        data: {
-          username: username,
+    try {
+      const { error } = await supabase.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: {
+            username: username,
+          }
         }
+      })
+      if (error) {
+        if (error.message == "User already registered") {
+          addAlert("Email already registered", "error");
+        } else if (error.message == "Database error saving new user") {
+          addAlert("Username already registered", "error");
+        } else {
+          addAlert(error.message, "error");
+        }
+        setLoading(false);
+        return;
       }
-    })
-    if (error) {
-      if (error.message == "User already registered") {
-        setError("Email already registered");
-      } else if (error.message == "Database error saving new user") {
-        setError("Username already registered");
-      } else {
-        setError(error.message);
-      }
-      setLoading(false);
+    } catch (err) {
+      addAlert("Failed to sign up", "error");
       return;
     }
     setLoading(false);
@@ -54,12 +57,6 @@ function SignupForm() {
     <div className="flex items-center justify-center mt-0 md:mt-[10%] px-4">
       <div className="max-w-md w-full bg-white p-8 rounded-lg shadow">
         <h2 className="text-3xl font-bold text-blue-600 text-center mb-6">Sign up for OmniChart</h2>
-
-        {error && (
-          <div className="bg-red-100 text-red-700 px-4 py-3 rounded mb-4 text-sm">
-            {error}
-          </div>
-        )}
 
         <form onSubmit={handleSignup} className="space-y-4">
           <div>

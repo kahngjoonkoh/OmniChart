@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase, isLoggedIn } from '../client/Auth';
+import { useAlert } from '../components/AlertBox';
 
 function LoginForm() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const { addAlert } = useAlert();
 
   useEffect(() => {
     isLoggedIn().then((state) => {
@@ -20,20 +21,25 @@ function LoginForm() {
   // Log in the user given username and password
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError(null);
     setLoading(true);
 
     try {
-      var { data, error } = await supabase
+      try {
+        var { data, error } = await supabase
         .from("profiles")
         .select('email')
         .eq('username', username)
         .single();
+      } catch (err) {
+        addAlert("Failed to log in", "error");
+        return;
+      }
+      
       if (error) {
         if (error.details == "The result contains 0 rows") {
-          setError("Invalid username or password");
+          addAlert("Invalid username or password", "error");
         } else {
-          setError(error.details);
+          addAlert(error.details);
         }
         return;
       }
@@ -44,13 +50,14 @@ function LoginForm() {
       }))
       if (error) {
         if (error.message == "Invalid login credentials") {
-          setError("Invalid username or password");
+          addAlert("Invalid username or password", "error");
         } else {
-          setError(error.message);
+          addAlert(error.message, "error");
         }
         return;
       }
       navigate('/');
+      addAlert("Successfully logged in", "success");
     } finally {
       setLoading(false);
     }
@@ -63,12 +70,6 @@ function LoginForm() {
         className="w-full max-w-md bg-white rounded-lg shadow-md p-8 space-y-6"
       >
         <h2 className="text-3xl font-bold text-blue-600 text-center">OmniChart</h2>
-
-        {error && (
-          <div className="bg-red-100 text-red-700 px-4 py-3 rounded mb-4 text-sm">
-            {error}
-          </div>
-        )}
 
         <div className="flex flex-col">
           <label className="mb-2 font-semibold text-gray-700" htmlFor="username">

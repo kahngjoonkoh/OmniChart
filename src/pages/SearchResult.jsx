@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import Header from '../components/Header';
+import { useAlert } from '../components/AlertBox';
 
 const baseUrl = import.meta.env.VITE_API_URL;
 
@@ -12,6 +13,7 @@ const SearchResult = () => {
   const [events, setEvents] = useState([]); // future-proof
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const { addAlert } = useAlert();
 
   useEffect(() => {
     if (!query) return;
@@ -20,7 +22,10 @@ const SearchResult = () => {
 
     fetch(`${baseUrl}/search?q=${encodeURIComponent(query)}`)
       .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch");
+        if (!res.ok) {
+          addAlert("Failed to query tickers", "error");
+          throw new Error("Failed to query ticker");
+        };
         return res.json();
       })
       .then((data) => {

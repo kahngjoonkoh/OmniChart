@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase, isLoggedIn, updateLoginStatus } from '../client/Auth';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import { addRecentStockQuery, getRecentStockQueries } from '../utils/RecentStocks';
+import { useAlert } from './AlertBox';
 
 const Header = ({ initialQuery = "" }) => {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ const Header = ({ initialQuery = "" }) => {
   const [recentQueries, setRecentQueries] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const inputRef = useRef();
+  const { addAlert } = useAlert();
 
   useEffect(() => {
     updateLoginStatus(setLoginStatus);
@@ -43,7 +45,11 @@ const Header = ({ initialQuery = "" }) => {
   };
 
   const logoutHandler = () => {
-    supabase.auth.signOut().then(() => navigate('/'));
+    try {
+      supabase.auth.signOut().then(() => navigate('/'));
+    } catch (err) {
+      addAlert("Failed to sign out", "error");
+    }
   };
 
   return (

@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { getAccessToken, isLoggedIn, supabase } from '../client/Auth';
+import { useAlert } from '../components/AlertBox';
 
 const baseUrl = import.meta.env.VITE_API_URL;
 
 const Home = () => {
   const [watchlist, setWatchlist] = useState(null);
   const [loginStatus, setLoginStatus] = useState(null);
+  const { addAlert } = useAlert();
 
   useEffect(() => {
     async function fetchData() {
@@ -15,12 +17,18 @@ const Home = () => {
       if (!state) return;
 
       const token = await getAccessToken();
-      const resp = await fetch(`${baseUrl}/watchlist`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-
+      let resp;
+      try {
+        resp = await fetch(`${baseUrl}/watchlist`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+      } catch (err) {
+        addAlert("Failed to fetch watchlist", "error");
+        return;
+      }
+      
       if (!resp.ok) {
-        console.error(`Failed to fetch user's watchlist`);
+        addAlert("Failed to fetch watchlist", "error");
         return;
       }
 
@@ -39,7 +47,7 @@ const Home = () => {
 
   return (
     <main className="flex items-center justify-center md:pt-[10%] bg-white px-6">
-      {loginStatus === false && (
+      {!loginStatus && (
         <div className="text-center max-w-2xl">
           <h1 className="text-4xl md:text-5xl font-extrabold text-blue-600 mb-4">
             Welcome to OmniChart

@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getAccessToken, updateLoginStatus } from '../client/Auth';
+import { useAlert } from './AlertBox';
+import { useNavigate } from 'react-router-dom';
 
 const baseUrl = import.meta.env.VITE_API_URL;
 
@@ -13,23 +15,29 @@ export default function CommentSection({ id }) {
   const [loginStatus, setLoginStatus] = useState(null);
   const [settings, setSettings] = useState({ sentiment: "", ascending: false });
 
+  const { addAlert } = useAlert();
+  const navigate = useNavigate();
+
   useEffect(() => {
     updateLoginStatus(setLoginStatus);
   }, []);
 
   useEffect(() => {
     async function fetchComments() {
+      let resp;
       try {
-        const resp = await fetch(`${baseUrl}/comments/${id}?${new URLSearchParams(settings).toString()}`);
-        if (!resp.ok) {
-          console.error("Failed to retrieve comments");
-          return;
-        }
-        const comments = await resp.json();
-        setComments(comments);
+        resp = await fetch(`${baseUrl}/comments/${id}?${new URLSearchParams(settings).toString()}`);
       } catch (err) {
-        console.error('Failed to fetch comments:', err);
+        addAlert("Failed to fetch comments", "error")
+        return;
       }
+      if (!resp.ok) {
+        addAlert("Failed to fetch comments", "error")
+        return;
+        // console.error("Failed to retrieve comments");
+      }
+      const comments = await resp.json();
+      setComments(comments);
     }
 
     fetchComments();
@@ -39,19 +47,24 @@ export default function CommentSection({ id }) {
     const content = newComment.trim();
 
     if (!content) {
-      alert("Please enter a comment before posting.");
+      addAlert("Please enter a comment before posting", "warning");
       return;
     }
 
     if (!newSentiment) {
-      alert("Please select a sentiment (opinion) before posting.");
+      addAlert("Please select a sentiment (opinion) before posting", "warning");
       return;
     }
 
     const token = await getAccessToken();
+    if (!token) {
+      navigate('/login');
+      return;
+    }
 
+    let resp;
     try {
-      const resp = await fetch(`${baseUrl}/comments`, {
+      resp = await fetch(`${baseUrl}/comments`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -60,25 +73,25 @@ export default function CommentSection({ id }) {
           sentiment: newSentiment
         })
       });
-
-      if (!resp.ok) {
-        alert("Failed to post comment. Please try again later.");
-        console.error("Failed to post comment");
-        return;
-      }
-
-      const data = await resp.json();
-
-      if (newSentiment === settings.sentiment || !settings.sentiment) {
-        setComments((prev) => settings.ascending ? [...prev, data] : [data, ...prev]);
-      }
-      setNewComment('');
-      setNewSentiment(null);
-      alert("Comment posted successfully!");
     } catch (err) {
-      alert("An error occurred while posting your comment.");
-      console.error('Failed to post comment:', err);
+      addAlert("Failed to post comment", "error");
+      return;
     }
+
+    if (!resp.ok) {
+      addAlert("Failed to post comment", "error");
+      // console.error("Failed to post comment");
+      return;
+    }
+
+    const data = await resp.json();
+
+    if (newSentiment === settings.sentiment || !settings.sentiment) {
+      setComments((prev) => settings.ascending ? [...prev, data] : [data, ...prev]);
+    }
+    setNewComment('');
+    setNewSentiment(null);
+    addAlert("Successfully posted comment", "success");
   };
 
 
