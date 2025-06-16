@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import {
-  LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer
+  LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, ReferenceLine
 } from 'recharts';
 import SegmentHighlighter from '../components/SegmentHighlight';
 import NewsPanel from '../components/NewsPanel';
@@ -70,11 +70,12 @@ export default function ChartDisplay() {
   });
 
   // subtracting 15.05m to prevent {"details":"subscription does not permit querying recent SIP data (HTTP 403)","error":"Error fetching historical bars"}
-  const [endDate, setEndDate] = useState(new Date(Date.now() - 15.05 * 60 * 1000)); 
+  const [endDate, setEndDate] = useState(new Date(Date.now() - 15.05 * 60 * 1000));
 
 
   const [minFetchedDate, setMinFetchedDate] = useState(null);
   const [maxFetchedDate, setMaxFetchedDate] = useState(null);
+  const [hoverY, setHoverY] = useState(null);
 
   const chartRef = useRef(null);
   const isDragging = useRef(false);
@@ -305,7 +306,7 @@ export default function ChartDisplay() {
           )}
         </h2>
         {beta !== null && (
-          <p><strong>Risk Classification<InfoTooltip text={`This classification is derived from the beta value (${beta.toFixed(2)}):
+          <div><strong>Risk Classification<InfoTooltip text={`This classification is derived from the beta value (${beta.toFixed(2)}):
 
 < 0: Inverse Market Risk
 0: No Market Risk
@@ -314,7 +315,7 @@ export default function ChartDisplay() {
 1–2: High Risk
 > 2: Very High Risk
 
-Beta measures a stock's volatility compared to the market`} />:</strong> {riskCategory}</p>
+Beta measures a stock's volatility compared to the market`} />:</strong> {riskCategory}</div>
         )}
         <div className="flex items-center gap-4 mt-4 mb-2">
           <label htmlFor="range-select">View Range:</label>
@@ -339,10 +340,7 @@ Beta measures a stock's volatility compared to the market`} />:</strong> {riskCa
         </div>
         <div
           ref={chartRef}
-          onWheel={(e) => {
-            e.preventDefault();
-            handleZoom(e);
-          }}
+          onWheel={handleZoom}
           onMouseDown={handleMouseDown}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
@@ -350,7 +348,18 @@ Beta measures a stock's volatility compared to the market`} />:</strong> {riskCa
           style={{ cursor: isDragging.current ? 'grabbing' : 'grab' }}
         >
           <ResponsiveContainer width="100%" height={400}>
-            <LineChart data={visibleStockData}>
+            <LineChart
+              data={visibleStockData}
+              onMouseMove={(state) => {
+                if (state.isTooltipActive) {
+                  const yValue = state.activePayload[0]?.payload.price; // your y key here
+                  setHoverY(yValue);
+                } else {
+                  setHoverY(null);
+                }
+              }}
+              onMouseLeave={() => setHoverY(null)}
+            >
               <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
               <XAxis dataKey="date" minTickGap={30} />
               <YAxis
@@ -358,10 +367,30 @@ Beta measures a stock's volatility compared to the market`} />:</strong> {riskCa
                 domain={([dataMin, dataMax]) => [Math.max(dataMin - 10, 0), dataMax + 10]}
                 tickCount={5} tickFormatter={(value) => value.toFixed(2)}
               />
-              <Tooltip />
+              <Tooltip
+                cursor={({ y, width }) => (
+                  <line
+                    x1={0}
+                    y1={y}
+                    x2={width}
+                    y2={y}
+                    stroke="gray"
+                    strokeWidth={1}
+                    strokeDasharray="3 3"
+                  />
+                )}
+              />
               <Line type="monotone" dataKey="price" stroke="#007bff" strokeWidth={2} dot={false} isAnimationActive={false} />
               {segments.map(segment =>
                 SegmentHighlighter(segment, visibleStockData, selectedSegmentId === segment.id, setSelectedSegmentId, hoveredSegmentId === segment.id, setHoveredSegmentId)
+              )}
+              {hoverY !== null && (
+                <ReferenceLine
+                  y={hoverY}
+                  stroke="gray"
+                  strokeDasharray="3 3"
+                  ifOverflow="visible"
+                />
               )}
             </LineChart>
           </ResponsiveContainer>

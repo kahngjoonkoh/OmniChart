@@ -37,109 +37,181 @@ export default function CommentSection({ id }) {
 
   const handlePostComment = async () => {
     const content = newComment.trim();
-    if (!content || !newSentiment) {
+
+    if (!content) {
+      alert("Please enter a comment before posting.");
       return;
     }
+
+    if (!newSentiment) {
+      alert("Please select a sentiment (opinion) before posting.");
+      return;
+    }
+
     const token = await getAccessToken();
+
     try {
       const resp = await fetch(`${baseUrl}/comments`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           content: content,
           ticker_event_id: id,
           sentiment: newSentiment
         })
-      })
+      });
+
       if (!resp.ok) {
+        alert("Failed to post comment. Please try again later.");
         console.error("Failed to post comment");
         return;
       }
+
       const data = await resp.json();
-      if (newSentiment == settings.sentiment || !settings.sentiment) {
-        setComments((prev) => settings.ascending? [...prev, data] : [data, ...prev]);
+
+      if (newSentiment === settings.sentiment || !settings.sentiment) {
+        setComments((prev) => settings.ascending ? [...prev, data] : [data, ...prev]);
       }
       setNewComment('');
+      setNewSentiment(null);
+      alert("Comment posted successfully!");
     } catch (err) {
+      alert("An error occurred while posting your comment.");
       console.error('Failed to post comment:', err);
     }
   };
 
+
+  // const newSentimentCheckbox = (senti) => {
+  //   return <label>
+  //     <input
+  //       type="checkbox"
+  //       checked={senti == newSentiment}
+  //       onChange={(e) => {
+  //         if (e.target.checked) setNewSentiment(senti)
+  //       }}
+  //     />
+  //     {senti}
+  //   </label>
+  // }
+  const sentimentIcons = {
+    up: "👍",
+    neutral: "😐",
+    down: "👎",
+  };
+
   const newSentimentCheckbox = (senti) => {
-    return <label>
-      <input
-        type="checkbox"
-        checked={senti == newSentiment}
-        onChange={(e) => {
-          if (e.target.checked) setNewSentiment(senti)
-        }}
-      />
-      {senti}
-    </label>
-  }
+    const isSelected = senti === newSentiment;
+
+    return (
+      <button
+        type="button"
+        onClick={() => setNewSentiment(isSelected ? null : senti)}
+        className={`
+        text-2xl
+        cursor-pointer
+        select-none
+        transition
+        p-1 rounded-full
+        ${isSelected ? "bg-blue-100 text-blue-600" : "text-gray-400 hover:text-gray-600 hover:bg-gray-200"}
+      `}
+        aria-pressed={isSelected}
+        aria-label={`Select sentiment ${senti}`}
+        title={senti.charAt(0).toUpperCase() + senti.slice(1)}
+      >
+        {sentimentIcons[senti]}
+      </button>
+    );
+  };
 
   return (
-    <div style={{ marginTop: 10, paddingLeft: 10 }}>
-      {loginStatus && <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
-        <input
-          type="text"
-          placeholder="Add a comment..."
-          value={newComment}
-          onChange={(e) => setNewComment(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') handlePostComment();
-          }}
-          style={{
-            flex: 1,
-            fontSize: 12,
-            padding: '4px 6px',
-            border: '1px solid #ccc',
-            borderRadius: 4
-          }}
-        />
-        {newSentimentCheckbox("up")}
-        {newSentimentCheckbox("neutral")}
-        {newSentimentCheckbox("down")}
-        <button
-          onClick={handlePostComment}
-          style={{
-            fontSize: 12,
-            marginLeft: 5,
-            padding: '4px 10px',
-            borderRadius: 4,
-            cursor: 'pointer',
-          }}
-        >
-          Post
-        </button>
-      </div>}
-
-      <h2>Comments</h2>
-      <select name="sentiment" onChange={(e) => {
-        setSettings({ ...settings, sentiment: e.target.value })
-      }}>
-        <option value="">all</option>
-        <option value="up">up</option>
-        <option value="neutral">neutral</option>
-        <option value="down">down</option>
-      </select>
-      <select name="order" onChange={(e) => {
-        setSettings({ ...settings, ascending: e.target.value })
-      }}>
-        <option value={false}>Latest to earliest</option>
-        <option value={true}>Earliest to latest</option>
-      </select>
-      <ul>
-        {comments.map((c, i) => (
-          <li key={i}>
-            <div style={{ fontSize: 12, marginBottom: 5, color: '#555' }}>
-              <p>{c.username} {c.sentiment} {(new Date(c.created_at)).toLocaleString()}</p>
-              <p>• {c.content}</p>
+    <div className="mt-2 pl-2">
+      {loginStatus && (
+        <div className="mb-2 min-w-0">
+          <textarea
+            placeholder="Add a comment..."
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handlePostComment();
+              }
+            }}
+            className="w-full text-xs px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 resize-y"
+            rows={3}
+          />
+          <div className="flex items-center justify-between mt-2">
+            <div className="flex items-center space-x-2 flex-grow">
+              <span className="text-base font-medium select-none">Sentiment:</span>
+              {newSentimentCheckbox("up")}
+              {newSentimentCheckbox("neutral")}
+              {newSentimentCheckbox("down")}
             </div>
+            <button
+              onClick={handlePostComment}
+              className="text-xs px-3 py-1 rounded cursor-pointer bg-blue-600 text-white hover:bg-blue-700 transition flex-shrink-0 ml-4"
+            >
+              Post
+            </button>
+          </div>
+        </div>
+      )}
+
+      <h2 className="text-lg font-semibold mb-2">Comments</h2>
+
+      <div className="flex items-center space-x-4 mb-4 text-sm">
+        <label>
+          Sentiment:{" "}
+          <select
+            name="sentiment"
+            onChange={(e) => setSettings({ ...settings, sentiment: e.target.value })}
+            className="border border-gray-300 rounded px-2 py-1"
+            value={settings.sentiment}
+          >
+            <option value="">All</option>
+            <option value="up">Up</option>
+            <option value="neutral">Neutral</option>
+            <option value="down">Down</option>
+          </select>
+        </label>
+
+        <label>
+          Order:{" "}
+          <select
+            name="order"
+            onChange={(e) => setSettings({ ...settings, ascending: e.target.value === 'true' })}
+            className="border border-gray-300 rounded px-2 py-1"
+            value={settings.ascending.toString()}
+          >
+            <option value="false">Latest to earliest</option>
+            <option value="true">Earliest to latest</option>
+          </select>
+        </label>
+      </div>
+
+      <ul className="space-y-4">
+        {comments.map((c, i) => (
+          <li
+            key={i}
+            className="bg-gray-50 p-3 rounded shadow-sm border border-gray-200"
+          >
+            <div className="text-xs text-gray-600 mb-1 flex justify-between items-center">
+              <span className="font-semibold text-gray-800">{c.username}</span>
+              <span
+                className={`capitalize font-medium ${c.sentiment === 'up' ? 'text-green-600' :
+                  c.sentiment === 'down' ? 'text-red-600' :
+                    'text-gray-500'
+                  }`}
+              >
+                {c.sentiment}
+              </span>
+              <span>{new Date(c.created_at).toLocaleString()}</span>
+            </div>
+            <p className="text-sm text-gray-700 leading-relaxed">• {c.content}</p>
           </li>
         ))}
       </ul>
-      
     </div>
   );
 }

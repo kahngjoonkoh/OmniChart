@@ -28,7 +28,7 @@ function NewsPanel({ id, startIndex, endIndex, title, news, source_url }) {
           📰 Click or hover a colored chart area to view its related news event.
         </div>
       )}
-      <h2>{title}</h2>
+      <h2 className="text-xl font-semibold text-gray-800 mb-4">{title}</h2>
       <SplitNews news={news} />
 
       {source_url && (() => {
