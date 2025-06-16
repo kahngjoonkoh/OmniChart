@@ -410,6 +410,7 @@ Beta measures a stock's volatility compared to the market`} />:</strong> {riskCa
             <LineChart
               data={visibleStockData}
               onMouseMove={(state) => {
+                if (!state.isTooltipActive || !state.activePayload || !state.activePayload[0]) return null;
                 if (state.isTooltipActive) {
                   const yValue = state.activePayload[0]?.payload.price; // your y key here
                   setHoverY(yValue);
