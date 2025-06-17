@@ -23,8 +23,8 @@ const SearchResult = () => {
     fetch(`${baseUrl}/search?q=${encodeURIComponent(query)}`)
       .then((res) => {
         if (!res.ok) {
-          addAlert("Failed to query tickers", "error");
-          throw new Error("Failed to query ticker");
+          // addAlert("No matching tickers found. Please check your query and try again.", "error");
+          throw new Error("No matching tickers found. Please check your query and try again.");
         };
         return res.json();
       })
@@ -46,7 +46,7 @@ const SearchResult = () => {
         </h2>
 
         {loading && <p className="text-gray-500">Loading results...</p>}
-        {error && <p className="text-red-500">Error: {error}</p>}
+        {error && <p className="text-red-500">{error}</p>}
         {noResults && (
           <p className="text-gray-500 italic">No results found for "{query}".</p>
         )}

@@ -23,45 +23,6 @@ const toISOStringDateOnly = (date) => {
   return iso.replace('.000Z', 'Z');
 };
 
-const generateStockData = async (ticker, startDate, endDate) => {
-  if (!ticker) {
-    addAlert("Ticker symbol is undefined or empty");
-    // console.error("Error: Ticker symbol is undefined or empty.");
-    return [];
-  }
-
-  try {
-    const queryParams = new URLSearchParams({
-      start: toISOStringDateOnly(startDate),
-      end: toISOStringDateOnly(endDate)
-    });
-
-    const url = `${baseUrl}/bars/${ticker}?${queryParams}`;
-    let response;
-    try {
-      response = await fetch(url);
-    } catch (err) {
-      addAlert("Failed to fetch stock data", "error");
-      return [];
-    }
-    if (!response.ok) {
-      addAlert("Failed to fetch stock data", "error");
-      return [];
-      // throw new Error(`Failed to fetch stock data: ${response.status}`);
-    }
-
-    const apiData = await response.json();
-    return apiData.map(bar => ({
-      date: new Date(bar.t).toISOString().slice(0, 10),
-      timestamp: new Date(bar.t),
-      price: parseFloat(bar.c.toFixed(2)),
-    }));
-  } catch (error) {
-    addAlert("Failed to generate stock data", "error");
-    // console.error('Error in generateStockData:', error);
-    return [];
-  }
-};
 
 export default function ChartDisplay() {
   const { ticker } = useParams();
@@ -97,6 +58,46 @@ export default function ChartDisplay() {
   const visibleStockData = fullStockData.filter(d => {
     return d.timestamp >= startDate && d.timestamp <= endDate;
   });
+
+  const generateStockData = async (ticker, startDate, endDate) => {
+    if (!ticker) {
+      addAlert("Ticker symbol is undefined or empty");
+      // console.error("Error: Ticker symbol is undefined or empty.");
+      return [];
+    }
+
+    try {
+      const queryParams = new URLSearchParams({
+        start: toISOStringDateOnly(startDate),
+        end: toISOStringDateOnly(endDate)
+      });
+
+      const url = `${baseUrl}/bars/${ticker}?${queryParams}`;
+      let response;
+      try {
+        response = await fetch(url);
+      } catch (err) {
+        addAlert("Failed to fetch stock data", "error");
+        return [];
+      }
+      if (!response.ok) {
+        addAlert("Failed to fetch stock data", "error");
+        return [];
+        // throw new Error(`Failed to fetch stock data: ${response.status}`);
+      }
+
+      const apiData = await response.json();
+      return apiData.map(bar => ({
+        date: new Date(bar.t).toISOString().slice(0, 10),
+        timestamp: new Date(bar.t),
+        price: parseFloat(bar.c.toFixed(2)),
+      }));
+    } catch (error) {
+      addAlert("Stock data cannot be found", "error");
+      // console.error('Error in generateStockData:', error);
+      return [];
+    }
+  };
 
   useEffect(() => {
     async function fetchStockData() {
