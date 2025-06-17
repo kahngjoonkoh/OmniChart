@@ -10,7 +10,6 @@ function SignupForm() {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-  const { addAlert } = useAlert();
 
   useEffect(() => {
     isLoggedIn().then((state) => {
@@ -51,6 +50,7 @@ function SignupForm() {
     }
     setLoading(false);
     navigate('/');
+    addAlert("Successfully signed up", "success");
   };
 
   return (

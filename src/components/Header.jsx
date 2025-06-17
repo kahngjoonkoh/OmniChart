@@ -13,17 +13,17 @@ const Header = ({ initialQuery = "" }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const inputRef = useRef();
   const { addAlert } = useAlert();
+  const [username, setUsername] = useState(null);
 
   useEffect(() => {
-    updateLoginStatus(setLoginStatus);
+    updateLoginStatus(setLoginStatus, setUsername);
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      updateLoginStatus(setLoginStatus);
+      updateLoginStatus(setLoginStatus, setUsername);
     });
 
     return () => subscription.unsubscribe();
   }, []);
-
 
   useEffect(() => {
     setRecentQueries(getRecentStockQueries());
@@ -47,11 +47,13 @@ const Header = ({ initialQuery = "" }) => {
   const logoutHandler = () => {
     try {
       supabase.auth.signOut().then((err) => {
-        if (err) {
+        if (err.error) {
+          console.log(err);
           setLoginStatus(false);
           supabase.auth.setSession(null);
         }
         navigate('/');
+        addAlert("Successfully logged out", "success");
     });
     } catch (err) {
       addAlert("Failed to sign out", "error");
@@ -108,12 +110,17 @@ const Header = ({ initialQuery = "" }) => {
         {/* Auth Buttons */}
         <div className="flex gap-2 ml-auto">
           {loginStatus !== null && (loginStatus ? (
-            <button
-              onClick={logoutHandler}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-            >
-              Log out
-            </button>
+            <>
+              <span className="self-center text-gray-700 font-medium mr-4">
+                Hi, {username}
+              </span>
+              <button
+                onClick={logoutHandler}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+              >
+                Log out
+              </button>
+            </>
           ) : (
             <>
               <button

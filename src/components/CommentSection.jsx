@@ -15,12 +15,13 @@ export default function CommentSection({ id }) {
   const [comments, setComments] = useState([]);
   const [loginStatus, setLoginStatus] = useState(null);
   const [settings, setSettings] = useState({ sentiment: "", ascending: false });
+  const [username, setUsername] = useState(null);
 
   const { addAlert } = useAlert();
   const navigate = useNavigate();
 
   useEffect(() => {
-    updateLoginStatus(setLoginStatus);
+    updateLoginStatus(setLoginStatus, setUsername);
   }, []);
 
   useEffect(() => {
