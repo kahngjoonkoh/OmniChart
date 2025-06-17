@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getAccessToken, supabase, updateLoginStatus } from '../client/Auth';
 import { useAlert } from './AlertBox';
 import { useNavigate } from 'react-router-dom';
+import { REALTIME_LISTEN_TYPES, REALTIME_POSTGRES_CHANGES_LISTEN_EVENT } from '@supabase/supabase-js';
 
 const baseUrl = import.meta.env.VITE_API_URL;
 
@@ -41,22 +42,30 @@ export default function CommentSection({ id }) {
     }
 
     fetchComments();
+    sessionStorage.setItem("event_id", id);
+    sessionStorage.setItem("sentiment", settings.sentiment);
+    sessionStorage.setItem("ascending", settings.ascending.toString());
+  }, [id, settings]);
 
+  useEffect(() => {
     // Real-time subscription
     const subscription = supabase
-      .channel('public:comments')
+      .channel(`comments`)
       .on(
-        'postgres_changes',
+        REALTIME_LISTEN_TYPES.POSTGRES_CHANGES,
         {
-          event: '*',
+          event: REALTIME_POSTGRES_CHANGES_LISTEN_EVENT.INSERT,
           schema: 'public',
           table: 'comments',
         },
         (payload) => {
-          console.log("new comment");
-          if (payload.new.ticker_event_id === id && 
-            (payload.new.sentiment === settings.sentiment || !settings.sentiment))
-            setComments((prev) => [...prev, payload.new]);
+          const event_id = sessionStorage.getItem("event_id");
+          const sentiment = sessionStorage.getItem("sentiment");
+          const ascending = sessionStorage.getItem("ascending");
+          console.log(`${event_id}, ${payload.new.ticker_event_id}`);
+          if (payload.new.ticker_event_id === event_id && 
+            (payload.new.sentiment === sentiment || sentiment == ""))
+            setComments((prev) => ascending === "true" ? [...prev, payload.new] : [payload.new, ...prev]);
         }
       )
       .subscribe();
@@ -64,7 +73,7 @@ export default function CommentSection({ id }) {
     return () => {
       supabase.removeChannel(subscription);
     };
-  }, [id, settings]);
+  }, []);
 
   const handlePostComment = async () => {
     const content = newComment.trim();
@@ -109,9 +118,11 @@ export default function CommentSection({ id }) {
 
     const data = await resp.json();
 
+    /*
     if (newSentiment === settings.sentiment || !settings.sentiment) {
       setComments((prev) => settings.ascending ? [...prev, data] : [data, ...prev]);
     }
+    */
     setNewComment('');
     setNewSentiment(null);
     addAlert("Successfully posted comment", "success");

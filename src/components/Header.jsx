@@ -46,7 +46,13 @@ const Header = ({ initialQuery = "" }) => {
 
   const logoutHandler = () => {
     try {
-      supabase.auth.signOut().then(() => navigate('/'));
+      supabase.auth.signOut().then((err) => {
+        if (err) {
+          setLoginStatus(false);
+          supabase.auth.setSession(null);
+        }
+        navigate('/');
+    });
     } catch (err) {
       addAlert("Failed to sign out", "error");
     }
