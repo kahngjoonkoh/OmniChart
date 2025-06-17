@@ -13,7 +13,6 @@ const SearchResult = () => {
   const [events, setEvents] = useState([]); // future-proof
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const { addAlert } = useAlert();
 
   useEffect(() => {
     if (!query) return;
@@ -52,7 +51,7 @@ const SearchResult = () => {
         )}
 
         {/* Stocks */}
-        {tickers.length > 0 && (
+        {!error && tickers.length > 0 && (
           <section className="mb-6">
             <h3 className="text-xl font-bold text-gray-800 mb-2">Stocks</h3>
             <ul className="divide-y divide-gray-200 border border-gray-100 rounded-md shadow-sm">

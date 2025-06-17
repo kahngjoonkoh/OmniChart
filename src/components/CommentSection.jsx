@@ -15,7 +15,7 @@ export default function CommentSection({ id }) {
   const [comments, setComments] = useState([]);
   const [loginStatus, setLoginStatus] = useState(null);
   const [settings, setSettings] = useState({ sentiment: "", ascending: false });
-  const [username, setUsername] = useState(null);
+  const [_, setUsername] = useState(null);
 
   const { addAlert } = useAlert();
   const navigate = useNavigate();
@@ -118,30 +118,11 @@ export default function CommentSection({ id }) {
     }
 
     const data = await resp.json();
-
-    /*
-    if (newSentiment === settings.sentiment || !settings.sentiment) {
-      setComments((prev) => settings.ascending ? [...prev, data] : [data, ...prev]);
-    }
-    */
     setNewComment('');
     setNewSentiment(null);
     addAlert("Successfully posted comment", "success");
   };
 
-
-  // const newSentimentCheckbox = (senti) => {
-  //   return <label>
-  //     <input
-  //       type="checkbox"
-  //       checked={senti == newSentiment}
-  //       onChange={(e) => {
-  //         if (e.target.checked) setNewSentiment(senti)
-  //       }}
-  //     />
-  //     {senti}
-  //   </label>
-  // }
   const sentimentIcons = {
     up: "👍",
     neutral: "😐",
@@ -174,7 +155,7 @@ export default function CommentSection({ id }) {
 
   return (
     <div className="mt-2 pl-2">
-      {loginStatus && (
+      {loginStatus ? (
         <div className="mb-2 min-w-0">
           <textarea
             placeholder="Add a comment..."
@@ -204,7 +185,9 @@ export default function CommentSection({ id }) {
             </button>
           </div>
         </div>
-      )}
+      ) : <p className="text-base font-medium select-none mb-4">
+        <a href="/login" className="text-blue-600 hover:underline">Log in</a> to post a comment
+      </p>}
 
       <h2 className="text-lg font-semibold mb-2">Comments</h2>
 

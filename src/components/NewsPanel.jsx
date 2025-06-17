@@ -37,7 +37,7 @@ function NewsPanel({ id, startIndex, endIndex, title, news, source_url }) {
           const faviconUrl = `${urlObj.origin}/favicon.ico`;
 
           return (
-            <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 6, borderBottom: '1px solid #ccc' }}>
               <span style={{ fontWeight: 'bold' }}>Source: </span>
 
               <a

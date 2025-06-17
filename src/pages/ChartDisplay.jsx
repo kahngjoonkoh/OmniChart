@@ -354,11 +354,11 @@ export default function ChartDisplay() {
         <h2 className="text-xl font-bold">{ticker ? `${stockName} (${ticker.toUpperCase()})` : 'Loading...'}
           {inWatchlist !== null && (
             inWatchlist ? (
-              <button onClick={removeTickerFromWatchlist}>
+              <button onClick={removeTickerFromWatchlist} title="Remove from watchlist">
                 <BookmarkFilledIcon className="w-6 h-6 stroke-[2] text-blue-600 mx-1 p-1 items-center rounded hover:bg-gray-100 transition" />
               </button>
             ) : (
-              <button onClick={addTickerToWatchlist}>
+              <button onClick={addTickerToWatchlist} title="Add to watchlist">
                 <BookmarkOutlineIcon className="w-6 h-6 stroke-[2] text-blue-600 mx-1 p-1 items-center rounded hover:bg-gray-100 transition" />
               </button>
             )
