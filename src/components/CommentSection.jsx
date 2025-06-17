@@ -63,7 +63,6 @@ export default function CommentSection({ id }) {
           const event_id = sessionStorage.getItem("event_id");
           const sentiment = sessionStorage.getItem("sentiment");
           const ascending = sessionStorage.getItem("ascending");
-          console.log(`${event_id}, ${payload.new.ticker_event_id}`);
           if (payload.new.ticker_event_id === event_id && 
             (payload.new.sentiment === sentiment || sentiment == ""))
             setComments((prev) => ascending === "true" ? [...prev, payload.new] : [payload.new, ...prev]);
