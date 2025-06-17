@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getAccessToken, updateLoginStatus } from '../client/Auth';
+import { getAccessToken, supabase, updateLoginStatus } from '../client/Auth';
 import { useAlert } from './AlertBox';
 import { useNavigate } from 'react-router-dom';
 
@@ -41,6 +41,29 @@ export default function CommentSection({ id }) {
     }
 
     fetchComments();
+
+    // Real-time subscription
+    const subscription = supabase
+      .channel('public:comments')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'comments',
+        },
+        (payload) => {
+          console.log("new comment");
+          if (payload.new.ticker_event_id === id && 
+            (payload.new.sentiment === settings.sentiment || !settings.sentiment))
+            setComments((prev) => [...prev, payload.new]);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(subscription);
+    };
   }, [id, settings]);
 
   const handlePostComment = async () => {
