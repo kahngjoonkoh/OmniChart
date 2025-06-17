@@ -8,7 +8,7 @@ function SplitNews({ news }) {
   return (
     <ul>
       {news
-        .split(". ")
+        .split("\n")
         .map(item => item.trim())
         .filter(item => item.length > 0)
         .map((item, idx) => (

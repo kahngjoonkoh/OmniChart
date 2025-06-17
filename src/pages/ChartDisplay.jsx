@@ -133,7 +133,7 @@ export default function ChartDisplay() {
   useEffect(() => {
     async function fetchTickerEvents() {
       try {
-        const res = await axios.get(`${baseUrl}/events/${ticker}`);
+        const res = await axios.get(`${baseUrl}/events/${ticker}?timeframe=120`);
         const events = res.data;
         const enrichedSegments = await Promise.all(events.map(async (event) => {
           return {
