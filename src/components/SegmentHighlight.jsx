@@ -14,10 +14,10 @@ function SegmentHighlighter(segment, data, isSelected, onClick, isHovered, onHov
   const centerDate = new Date(segment.timestamp);
 
   const x1 = new Date(centerDate);
-  x1.setDate(x1.getDate() - 10);
+  x1.setDate(x1.getDate() - 3);
 
   const x2 = new Date(centerDate);
-  x2.setDate(x2.getDate() + 10);
+  x2.setDate(x2.getDate() + 5);
 
   function binarySearchClosest(targetDate) {
     let left = 0;
