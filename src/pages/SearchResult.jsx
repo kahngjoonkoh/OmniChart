@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import { useAlert } from '../components/AlertBox';
 
@@ -13,7 +13,7 @@ const SearchResult = () => {
   const [events, setEvents] = useState([]); // future-proof
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const { addAlert } = useAlert();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!query) return;
@@ -52,7 +52,7 @@ const SearchResult = () => {
         )}
 
         {/* Stocks */}
-        {tickers.length > 0 && (
+        {!error && tickers.length > 0 && (
           <section className="mb-6">
             <h3 className="text-xl font-bold text-gray-800 mb-2">Stocks</h3>
             <ul className="divide-y divide-gray-200 border border-gray-100 rounded-md shadow-sm">
@@ -77,7 +77,11 @@ const SearchResult = () => {
             <h3 className="text-xl font-bold text-gray-800 mb-2">Events</h3>
             <ul className="divide-y divide-gray-200 border border-gray-100 rounded-md shadow-sm">
               {events.map((event, index) => (
-                <li key={index} className="px-4 py-3">
+                <li
+                  key={index}
+                  onClick={() => navigate(`/stocks/NVDA`)} // temporary solution. Only works for NVDA at the moment.
+                  className="px-4 py-3 cursor-pointer hover:bg-gray-50 transition"
+                >
                   <div className="text-blue-700 font-medium">{event.title}</div>
                   <div className="text-sm text-gray-500">{event.description}</div>
                 </li>

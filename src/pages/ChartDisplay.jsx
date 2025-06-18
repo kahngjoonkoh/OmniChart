@@ -44,7 +44,7 @@ export default function ChartDisplay() {
   });
 
   // subtracting 15.05m to prevent {"details":"subscription does not permit querying recent SIP data (HTTP 403)","error":"Error fetching historical bars"}
-  const [endDate, setEndDate] = useState(new Date(Date.now() - 15.05 * 60 * 1000));
+  const [endDate, setEndDate] = useState(new Date());
 
 
   const [minFetchedDate, setMinFetchedDate] = useState(null);
@@ -133,7 +133,7 @@ export default function ChartDisplay() {
   useEffect(() => {
     async function fetchTickerEvents() {
       try {
-        const res = await axios.get(`${baseUrl}/events/${ticker}`);
+        const res = await axios.get(`${baseUrl}/events/${ticker}?timeframe=120`);
         const events = res.data;
         const enrichedSegments = await Promise.all(events.map(async (event) => {
           return {
@@ -143,7 +143,8 @@ export default function ChartDisplay() {
             endIndex: event.end_index,
             title: event.events.title,
             news: event.events.content,
-            source_url: event.events.source_url
+            source_url: event.events.source_url,
+            event_type_id: event.events.event_types_id
           };
         }));
         setSegments(enrichedSegments);
@@ -354,11 +355,11 @@ export default function ChartDisplay() {
         <h2 className="text-xl font-bold">{ticker ? `${stockName} (${ticker.toUpperCase()})` : 'Loading...'}
           {inWatchlist !== null && (
             inWatchlist ? (
-              <button onClick={removeTickerFromWatchlist}>
+              <button onClick={removeTickerFromWatchlist} title="Remove from watchlist">
                 <BookmarkFilledIcon className="w-6 h-6 stroke-[2] text-blue-600 mx-1 p-1 items-center rounded hover:bg-gray-100 transition" />
               </button>
             ) : (
-              <button onClick={addTickerToWatchlist}>
+              <button onClick={addTickerToWatchlist} title="Add to watchlist">
                 <BookmarkOutlineIcon className="w-6 h-6 stroke-[2] text-blue-600 mx-1 p-1 items-center rounded hover:bg-gray-100 transition" />
               </button>
             )
