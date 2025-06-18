@@ -20,7 +20,8 @@ function SplitNews({ news }) {
   );
 }
 
-function NewsPanel({ id, startIndex, endIndex, title, news, source_url }) {
+function NewsPanel({ id, startIndex, endIndex, title, news, source_url, event_type_id }) {
+  console.log(event_type_id)
   return (
     <div style={{ flex: 1, borderLeft: '1px solid #ccc', padding: 20, overflowY: 'auto' }}>
       {!id && (
@@ -37,8 +38,18 @@ function NewsPanel({ id, startIndex, endIndex, title, news, source_url }) {
           const faviconUrl = `${urlObj.origin}/favicon.ico`;
 
           return (
-            <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 6, borderBottom: '1px solid #ccc' }}>
-              <span style={{ fontWeight: 'bold' }}>Source: </span>
+            <div
+              style={{
+                marginTop: 10,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                flexWrap: 'wrap',
+                borderBottom: '1px solid #ccc',
+                paddingBottom: 4,
+              }}
+            >
+              <span style={{ fontWeight: 'bold' }}>Source:</span>
 
               <a
                 href={source_url}
@@ -52,25 +63,25 @@ function NewsPanel({ id, startIndex, endIndex, title, news, source_url }) {
                   alt="website favicon"
                   style={{ width: 18, height: 18, marginRight: 6, objectFit: 'contain' }}
                   onError={(e) => {
-                    // fallback if favicon not found, hide image or replace with default icon
                     e.currentTarget.style.display = 'none';
                   }}
                 />
-                {/* Optional: Show domain text next to icon */}
                 <span style={{ color: '#1a0dab', fontSize: '0.875rem' }}>{urlObj.hostname}</span>
               </a>
+
+              {event_type_id === 19 && (
+                <span className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
+                  🧠 AI generated
+                </span>
+              )}
             </div>
           );
         } catch {
-          // invalid URL fallback
           return null;
         }
       })()}
 
-
-      {id && (
-        <CommentSection id={id}/>
-      )}
+      {id && <CommentSection id={id} />}
     </div>
   );
 }

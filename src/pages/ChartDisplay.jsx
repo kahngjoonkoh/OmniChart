@@ -44,7 +44,7 @@ export default function ChartDisplay() {
   });
 
   // subtracting 15.05m to prevent {"details":"subscription does not permit querying recent SIP data (HTTP 403)","error":"Error fetching historical bars"}
-  const [endDate, setEndDate] = useState(new Date(Date.now() - 15.05 * 60 * 1000));
+  const [endDate, setEndDate] = useState(new Date());
 
 
   const [minFetchedDate, setMinFetchedDate] = useState(null);
@@ -143,7 +143,8 @@ export default function ChartDisplay() {
             endIndex: event.end_index,
             title: event.events.title,
             news: event.events.content,
-            source_url: event.events.source_url
+            source_url: event.events.source_url,
+            event_type_id: event.events.event_types_id
           };
         }));
         setSegments(enrichedSegments);

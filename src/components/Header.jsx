@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase, isLoggedIn, updateLoginStatus } from '../client/Auth';
+import { supabase, updateLoginStatus } from '../client/Auth';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import { addRecentStockQuery, getRecentStockQueries } from '../utils/RecentStocks';
 import { useAlert } from './AlertBox';
@@ -47,14 +47,14 @@ const Header = ({ initialQuery = "" }) => {
   const logoutHandler = () => {
     try {
       supabase.auth.signOut().then((err) => {
-        if (err.error) {
+        if (err?.error) {
           console.log(err);
           setLoginStatus(false);
           supabase.auth.setSession(null);
         }
         navigate('/');
         addAlert("Successfully logged out", "success");
-    });
+      });
     } catch (err) {
       addAlert("Failed to sign out", "error");
     }
@@ -78,7 +78,7 @@ const Header = ({ initialQuery = "" }) => {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => setShowDropdown(true)}
-            onBlur={() => setTimeout(() => setShowDropdown(false), 100)} // small delay so click registers
+            onBlur={() => setTimeout(() => setShowDropdown(false), 100)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             ref={inputRef}
             placeholder="Search stocks (e.g. AAPL or Apple)"
@@ -108,17 +108,23 @@ const Header = ({ initialQuery = "" }) => {
         </div>
 
         {/* Auth Buttons */}
-        <div className="flex gap-2 ml-auto">
-          {loginStatus !== null && (loginStatus ? (
+        <div className="flex gap-4 items-center ml-auto">
+          {loginStatus !== null && loginStatus ? (
             <>
-              <span className="self-center text-gray-700 font-medium mr-4">
+              <span className="text-gray-700 font-medium">
                 Hi, {username}
               </span>
+              <button
+                onClick={() => navigate("/")}
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition"
+              >
+                Watchlist
+              </button>
               <button
                 onClick={logoutHandler}
                 className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
               >
-                Log out
+                Sign Out
               </button>
             </>
           ) : (
@@ -136,7 +142,7 @@ const Header = ({ initialQuery = "" }) => {
                 Log in
               </button>
             </>
-          ))}
+          )}
         </div>
       </div>
     </header>
