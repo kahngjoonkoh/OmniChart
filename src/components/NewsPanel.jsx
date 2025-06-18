@@ -8,11 +8,11 @@ function SplitNews({ news }) {
   return (
     <ul>
       {news
-        .split("\n")
+        .split(". ")
         .map(item => item.trim())
         .filter(item => item.length > 0)
         .map((item, idx) => (
-          <li key={idx} style={{ marginBottom: 10 }}>
+          <li key={idx} style={{ marginBottom: 10, listStyle: 'disc' }}>
             <div>{item}.</div>
           </li>
         ))}
