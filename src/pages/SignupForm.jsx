@@ -8,6 +8,7 @@ function SignupForm() {
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
+  const { addAlert } = useAlert();
 
   const navigate = useNavigate();
 
